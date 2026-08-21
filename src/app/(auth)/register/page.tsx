@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Diamond, ArrowRight, ArrowLeft, AlertCircle, Check } from "lucide-react";
+import { Diamond, ArrowRight, ArrowLeft, AlertCircle, Check, Eye, EyeOff } from "lucide-react";
 
 const ROLES = [
   { value: "supplier", label: "Supplier", desc: "I supply commodities" },
@@ -17,7 +17,7 @@ const COUNTRIES = [
   { code: "ng", name: "Nigeria" }, { code: "gh", name: "Ghana" },
   { code: "tz", name: "Tanzania" }, { code: "cd", name: "DR Congo" },
   { code: "ke", name: "Kenya" }, { code: "ug", name: "Uganda" },
-  { code: "xx", name: "South Africa" }, { code: "xx", name: "Other" },
+  { code: "za", name: "South Africa" }, { code: "xx", name: "Other" },
 ];
 
 export default function RegisterPage() {
@@ -31,6 +31,8 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [role, setRole] = useState("");
   const [country, setCountry] = useState("");
   const ic = "w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition";
@@ -64,7 +66,7 @@ export default function RegisterPage() {
                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${role === r.value ? "border-gold-500 bg-gold-500" : "border-dark-600"}`}>{role === r.value && <Check size={12} className="text-dark-950" />}</div>
                 <div><p className="font-medium text-sm">{r.label}</p><p className="text-xs opacity-70">{r.desc}</p></div>
               </button>))}</div></div>
-            <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Country</label><select value={country} onChange={(e) => setCountry(e.target.value)} className={ic}><option value="">Select country</option>{COUNTRIES.map((c) => (<option key={c.code} value={c.code}>{c.name}</option>))}</select></div>
+            <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Country</label><select value={country} onChange={(e) => setCountry(e.target.value)} className={ic}><option value="">Select country</option>{COUNTRIES.map((c) => (<option key={`${c.code}-${c.name}`} value={c.code}>{c.name}</option>))}</select></div>
             <button onClick={() => { if (!role) { setError("Please select a role"); return; } if (!country) { setError("Please select a country"); return; } setError(""); setStep(1); }} className="button-gold w-full rounded-lg py-3 flex items-center justify-center gap-2 text-[15px]">Continue <ArrowRight size={16} strokeWidth={2.5} /></button>
           </div>)}
 
@@ -79,8 +81,24 @@ export default function RegisterPage() {
 
           {step === 2 && (<div className="space-y-5">
             <div><h2 className="text-2xl font-bold mb-1">Set your password</h2><p className="text-gray-muted text-sm">Choose a strong password to secure your account.</p></div>
-            <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" className={ic} /></div>
-            <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Confirm password</label><input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className={ic} /></div>
+            <div>
+              <label className="block text-sm font-medium text-gray-muted mb-1.5">Password</label>
+              <div className="relative">
+                <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" className={`${ic} pr-12`} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-muted hover:text-white transition" tabIndex={-1}>
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-muted mb-1.5">Confirm password</label>
+              <div className="relative">
+                <input type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className={`${ic} pr-12`} />
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-muted hover:text-white transition" tabIndex={-1}>
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
             <div className="flex gap-3"><button onClick={() => setStep(1)} className="flex-1 border border-dark-700 rounded-lg py-3 flex items-center justify-center gap-2 text-[15px] hover:bg-dark-800 transition"><ArrowLeft size={16} /> Back</button>
               <button onClick={handleSubmit} disabled={loading} className="flex-1 button-gold rounded-lg py-3 flex items-center justify-center gap-2 text-[15px] disabled:opacity-50">{loading ? <div className="w-5 h-5 border-2 border-dark-950 border-t-transparent rounded-full animate-spin" /> : <>Create account <ArrowRight size={16} strokeWidth={2.5} /></>}</button></div>
           </div>)}

@@ -4,7 +4,7 @@ import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
-import { Diamond, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
+import { Diamond, ArrowRight, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -12,6 +12,8 @@ function ResetPasswordForm() {
   const token = searchParams.get("token") || "";
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,9 +39,25 @@ function ResetPasswordForm() {
           <h2 className="text-2xl font-bold mb-1">Reset password</h2><p className="text-gray-muted text-sm mb-6">Enter your new password below.</p>
           {error && (<div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-6"><AlertCircle size={16} className="text-red-400 shrink-0" /><p className="text-red-400 text-sm">{error}</p></div>)}
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div><label className="block text-sm font-medium text-gray-muted mb-1.5">New password</label><input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" className={ic} /></div>
-            <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Confirm password</label><input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className={ic} /></div>
-            <button type="submit" disabled={loading} className="button-gold w-full rounded-lg py-3 flex items-center justify-center gap-2 text-[15px] disabled:opacity-50">{loading ? "Resetting..." : <>Reset password <ArrowRight size={16} strokeWidth={2.5} /></>}</button>
+            <div>
+              <label className="block text-sm font-medium text-gray-muted mb-1.5">New password</label>
+              <div className="relative">
+                <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" className={`${ic} pr-12`} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-muted hover:text-white transition" tabIndex={-1}>
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-muted mb-1.5">Confirm password</label>
+              <div className="relative">
+                <input type={showConfirm ? "text" : "password"} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className={`${ic} pr-12`} />
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-muted hover:text-white transition" tabIndex={-1}>
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+            <button type="submit" disabled={loading} className="button-gold w-full rounded-lg py-3 flex items-center justify-center gap-2 text-[15px] disabled:opacity-50">{loading ? <div className="w-5 h-5 border-2 border-dark-950 border-t-transparent rounded-full animate-spin" /> : <>Reset password <ArrowRight size={16} strokeWidth={2.5} /></>}</button>
           </form>
         </>
       )}

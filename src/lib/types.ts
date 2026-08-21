@@ -2,8 +2,12 @@
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
-  accessTokenJti: string;
-  refreshTokenJti: string;
+  accessTokenExpiresInSeconds: number;
+  userId: string;
+  email: string;
+  role: string;
+  country: string;
+  authorities: string[];
 }
 
 export interface UserProfile {
@@ -15,6 +19,7 @@ export interface UserProfile {
   country: string;
   verificationStatus: string;
   active: boolean;
+  createdAt: string;
 }
 
 // ─── Enums ─────────────────────────────────────────────
