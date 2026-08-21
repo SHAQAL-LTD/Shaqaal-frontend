@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { AuthProvider } from "@/contexts/AuthContext";
+import "./globals.css";
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: 'Shaqal TradeOS | Enterprise Commodity Platform',
-  description: 'Global Deal Management and Compliance OS',
+  title: "Shaqal TradeOS | Enterprise Commodity Platform",
+  description: "Global Deal Management and Compliance OS",
 };
 
 export default function RootLayout({
@@ -15,11 +16,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang= "en" className = {`${inter.variable} antialiased dark`
-}>
-  <body className="min-h-screen bg-dark-950 text-white selection:bg-gold-500 selection:text-dark-950 font-sans flex flex-col" >
-    { children }
-    </body>
+    <html lang="en" className={`${inter.variable} antialiased dark`}>
+      <body className="min-h-screen bg-dark-950 text-white selection:bg-gold-500 selection:text-dark-950 font-sans flex flex-col">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
