@@ -173,7 +173,8 @@ export const api = {
     submit: (docTypes: string[], files: File[], organizationId?: string) => {
       const fd = new FormData();
       files.forEach(f => fd.append("files", f));
-      const params: Record<string, string> = { docTypes: docTypes.join(",") };
+      docTypes.forEach(dt => fd.append("docTypes", dt));
+      const params: Record<string, string> = {};
       if (organizationId) params.organizationId = organizationId;
       return request<T.KycSubmission>("/kyc/submissions", { method: "POST", body: fd, params });
     },
