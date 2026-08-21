@@ -1,9 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, Shield, Bell, LogOut, ChevronRight, ExternalLink } from "lucide-react";
+import { api } from "@/lib/api";
+import {
+  User,
+  Shield,
+  LogOut,
+  ChevronRight,
+  Mail,
+  CheckCircle,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 
 const ROLE_LABELS: Record<string, string> = {
   supplier: "Supplier", buyer: "Buyer", broker: "Broker",
@@ -13,69 +23,177 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [passwordSent, setPasswordSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const sections = [
-    {
-      title: "Profile",
-      items: [
-        { label: "Edit name & phone", href: "/dashboard/profile", icon: User },
-        { label: "View full profile", href: "/dashboard/profile", icon: ExternalLink },
-      ],
-    },
-    {
-      title: "Security",
-      items: [
-        { label: "Change password", href: "/dashboard/profile", icon: Shield },
-      ],
-    },
-  ];
+  async function handleChangePassword() {
+    if (!user?.email) return;
+    setLoading(true); setError("");
+    try {
+      await api.auth.forgotPassword(user.email);
+      setPasswordSent(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to send reset email");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-700 max-w-3xl">
+    <div className="p-4 md:p-8 lg:p-10 space-y-8 animate-fade-in-up max-w-3xl">
+      {/* Header */}
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-        <p className="text-gray-muted mt-1">Manage your account preferences.</p>
+        <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
+        <p className="text-gray-muted mt-2 text-[15px]">Manage your account preferences and security.</p>
       </div>
 
-      {/* Account Summary */}
-      <div className="glass-panel rounded-2xl p-6">
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-xl shrink-0 shadow-lg shadow-gold-500/20">
+      {/* Account Card */}
+      <div className="glass-panel-elevated rounded-2xl p-6 card-hover">
+        <div className="flex items-center gap-5">
+          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-2xl shrink-0 shadow-lg shadow-gold-500/25">
             {user?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
           </div>
-          <div>
-            <h3 className="font-semibold text-lg">{user?.fullName}</h3>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-bold">{user?.fullName}</h2>
             <p className="text-sm text-gray-muted">{user?.email}</p>
-            <p className="text-xs text-gold-500 mt-0.5">{ROLE_LABELS[user?.role || ""] || user?.role}</p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gold-500/10 text-gold-500 border border-gold-500/20">
+                {ROLE_LABELS[user?.role || ""] || user?.role}
+              </span>
+              {user?.country && (
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-dark-800 text-gray-muted border border-dark-700 uppercase">
+                  {user.country}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Sections */}
-      {sections.map((section) => (
-        <div key={section.title}>
-          <h3 className="text-xs font-semibold text-gray-muted uppercase tracking-wider mb-3">{section.title}</h3>
-          <div className="glass-panel rounded-xl divide-y divide-dark-800/50 overflow-hidden">
-            {section.items.map((item) => (
-              <Link key={item.label} href={item.href} className="flex items-center gap-3 px-5 py-4 hover:bg-dark-800/50 transition group">
-                <item.icon size={18} className="text-gray-muted group-hover:text-gold-500 transition" />
-                <span className="flex-1 text-sm font-medium">{item.label}</span>
-                <ChevronRight size={16} className="text-dark-600 group-hover:text-gold-500 transition" />
-              </Link>
-            ))}
-          </div>
+      {/* Profile Section */}
+      <div>
+        <h3 className="text-xs font-semibold text-gray-muted uppercase tracking-wider mb-3">Profile</h3>
+        <div className="glass-panel rounded-2xl divide-y divide-white/[0.03] overflow-hidden">
+          <Link href="/dashboard/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition group">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <User size={18} className="text-blue-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium group-hover:text-gold-500 transition">Edit profile</p>
+              <p className="text-xs text-gray-muted">Update your name, phone, and photo</p>
+            </div>
+            <ChevronRight size={16} className="text-dark-600 group-hover:text-gold-500 transition shrink-0" />
+          </Link>
+          <Link href="/dashboard/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition group">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Mail size={18} className="text-emerald-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium group-hover:text-gold-500 transition">Email address</p>
+              <p className="text-xs text-gray-muted">{user?.email}</p>
+            </div>
+            <span className="text-[10px] text-gray-muted bg-dark-800 px-2 py-1 rounded-full border border-dark-700">Verified</span>
+          </Link>
         </div>
-      ))}
+      </div>
+
+      {/* Security Section */}
+      <div>
+        <h3 className="text-xs font-semibold text-gray-muted uppercase tracking-wider mb-3">Security</h3>
+        <div className="glass-panel rounded-2xl overflow-hidden">
+          {!showChangePassword ? (
+            <button
+              onClick={() => setShowChangePassword(true)}
+              className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition group w-full text-left"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gold-500/10 flex items-center justify-center shrink-0">
+                <Shield size={18} className="text-gold-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium group-hover:text-gold-500 transition">Change password</p>
+                <p className="text-xs text-gray-muted">We&apos;ll send a secure reset link to your email</p>
+              </div>
+              <ChevronRight size={16} className="text-dark-600 group-hover:text-gold-500 transition shrink-0" />
+            </button>
+          ) : (
+            <div className="p-6 space-y-4">
+              {passwordSent ? (
+                <div className="text-center py-4">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle size={28} className="text-emerald-400" />
+                  </div>
+                  <h4 className="text-lg font-bold mb-1">Check your email</h4>
+                  <p className="text-sm text-gray-muted mb-4">
+                    We sent a password reset link to <span className="text-white font-medium">{user?.email}</span>.
+                    Click the link in the email to set a new password.
+                  </p>
+                  <button
+                    onClick={() => { setShowChangePassword(false); setPasswordSent(false); }}
+                    className="text-sm text-gold-500 hover:text-gold-400 font-medium transition"
+                  >
+                    Back to settings
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-semibold">Send password reset email</h4>
+                      <p className="text-xs text-gray-muted mt-0.5">
+                        A secure link will be sent to <span className="text-white">{user?.email}</span>
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowChangePassword(false)}
+                      className="text-xs text-gray-muted hover:text-white transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  {error && (
+                    <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                      <p className="text-red-400 text-xs">{error}</p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleChangePassword}
+                    disabled={loading}
+                    className="button-gold w-full rounded-xl py-3 flex items-center justify-center gap-2 text-sm font-semibold disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <Mail size={16} /> Send reset link
+                        <ArrowRight size={14} />
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Danger Zone */}
       <div>
-        <h3 className="text-xs font-semibold text-red-400/60 uppercase tracking-wider mb-3">Danger Zone</h3>
-        <div className="border border-red-500/20 rounded-xl overflow-hidden">
-          <button onClick={logout} className="flex items-center gap-3 px-5 py-4 hover:bg-red-500/5 transition w-full text-left group">
-            <LogOut size={18} className="text-red-400" />
+        <h3 className="text-xs font-semibold text-red-400/50 uppercase tracking-wider mb-3">Danger Zone</h3>
+        <div className="border border-red-500/15 rounded-2xl overflow-hidden bg-red-500/[0.02]">
+          <button
+            onClick={logout}
+            className="flex items-center gap-4 px-6 py-4 hover:bg-red-500/[0.04] transition w-full text-left group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+              <LogOut size={18} className="text-red-400" />
+            </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-red-400">Sign out</p>
-              <p className="text-xs text-gray-muted">End your current session</p>
+              <p className="text-xs text-gray-muted">End your current session on this device</p>
             </div>
           </button>
         </div>

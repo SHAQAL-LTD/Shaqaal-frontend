@@ -11,7 +11,6 @@ import {
   FileText,
   ShieldCheck,
   Building2,
-  ChevronLeft,
   LogOut,
   Menu,
   X,
@@ -21,6 +20,7 @@ import {
   Settings,
   ClipboardList,
   Scale,
+  ArrowRight,
 } from "lucide-react";
 
 // ─── Role-Based Navigation ──────────────────────────────
@@ -32,130 +32,81 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  {
-    href: "/dashboard",
-    label: "Overview",
-    icon: LayoutDashboard,
-    roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"],
-  },
-  {
-    href: "/dashboard/deals",
-    label: "Deals",
-    icon: FileText,
-    roles: ["supplier", "buyer", "broker", "financier", "facilitator"],
-  },
-  {
-    href: "/dashboard/organizations",
-    label: "Organizations",
-    icon: Building2,
-    roles: ["supplier", "buyer", "broker", "financier", "facilitator", "admin"],
-  },
-  {
-    href: "/dashboard/compliance",
-    label: "Compliance",
-    icon: ShieldCheck,
-    roles: ["compliance_officer", "admin"],
-  },
-  {
-    href: "/dashboard/audit",
-    label: "Audit Trail",
-    icon: ClipboardList,
-    roles: ["compliance_officer", "admin", "broker"],
-  },
-  {
-    href: "/dashboard/kyc",
-    label: "KYC / Verification",
-    icon: Scale,
-    roles: ["supplier", "buyer", "broker", "financier", "facilitator"],
-  },
-  {
-    href: "/dashboard/settings",
-    label: "Settings",
-    icon: Settings,
-    roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"],
-  },
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"] },
+  { href: "/dashboard/deals", label: "Deals", icon: FileText, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
+  { href: "/dashboard/organizations", label: "Organizations", icon: Building2, roles: ["supplier", "buyer", "broker", "financier", "facilitator", "admin"] },
+  { href: "/dashboard/compliance", label: "Compliance", icon: ShieldCheck, roles: ["compliance_officer", "admin"] },
+  { href: "/dashboard/audit", label: "Audit Trail", icon: ClipboardList, roles: ["compliance_officer", "admin", "broker"] },
+  { href: "/dashboard/kyc", label: "KYC / Verification", icon: Scale, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"] },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
-  supplier: "Supplier",
-  buyer: "Buyer",
-  broker: "Broker",
-  financier: "Financier",
-  compliance_officer: "Compliance Officer",
-  facilitator: "Facilitator",
-  admin: "Administrator",
+  supplier: "Supplier", buyer: "Buyer", broker: "Broker",
+  financier: "Financier", compliance_officer: "Compliance Officer",
+  facilitator: "Facilitator", admin: "Administrator",
 };
 
-// ─── Sidebar Content ────────────────────────────────────
+// ─── Sidebar ────────────────────────────────────────────
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-
-  const visibleNav = NAV_ITEMS.filter(
-    (item) => user?.role && item.roles.includes(user.role)
-  );
+  const visibleNav = NAV_ITEMS.filter((item) => user?.role && item.roles.includes(user.role));
 
   return (
     <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="p-6 border-b border-dark-800">
-        <Link href="/" onClick={onNavClick}>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-md border border-gold-500/30 flex items-center justify-center">
-              <Diamond size={20} className="text-gold-500" strokeWidth={1.5} />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-gradient-gold">SHAQAL</h1>
-              <p className="text-[10px] text-gray-muted uppercase tracking-[0.2em] font-semibold">TradeOS</p>
-            </div>
+      <div className="p-5 border-b border-white/[0.04]">
+        <Link href="/" onClick={onNavClick} className="flex items-center gap-3 group">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center shadow-md shadow-gold-500/20">
+            <Diamond size={18} className="text-dark-950" strokeWidth={2} />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold tracking-tight text-gradient-gold">SHAQAL</h1>
+            <p className="text-[9px] text-gray-muted uppercase tracking-[0.25em] font-semibold">TradeOS</p>
           </div>
         </Link>
       </div>
 
-      {/* Nav Items */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {visibleNav.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname.startsWith(item.href));
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
               href={item.href}
               onClick={onNavClick}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ${
                 isActive
-                  ? "bg-gold-500/10 text-gold-500 border border-gold-500/20"
-                  : "text-gray-muted hover:bg-dark-800 hover:text-white"
+                  ? "bg-gold-500/10 text-gold-500 border border-gold-500/15 shadow-sm shadow-gold-500/5"
+                  : "text-gray-muted hover:bg-white/[0.03] hover:text-white border border-transparent"
               }`}
             >
-              <item.icon size={18} strokeWidth={1.5} />
+              <item.icon size={17} strokeWidth={1.5} />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      {/* User Card */}
-      <div className="p-4 border-t border-dark-800">
+      <div className="p-3 border-t border-white/[0.04]">
         <Link
           href="/dashboard/profile"
           onClick={onNavClick}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg glass-panel hover:bg-dark-800 transition group"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl glass-panel hover:bg-white/[0.04] transition group"
         >
-          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-xs shrink-0 shadow-md shadow-gold-500/20">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-[11px] shrink-0 shadow-sm shadow-gold-500/20">
             {user?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate group-hover:text-gold-500 transition">{user?.fullName || "User"}</p>
-            <p className="text-xs text-gray-muted truncate">{ROLE_LABELS[user?.role || ""] || user?.role || "Unknown"}</p>
+            <p className="text-[13px] font-semibold truncate group-hover:text-gold-500 transition">{user?.fullName || "User"}</p>
+            <p className="text-[11px] text-gray-muted truncate">{ROLE_LABELS[user?.role || ""] || user?.role}</p>
           </div>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); logout(); }}
             className="text-gray-muted hover:text-red-400 transition shrink-0 p-1.5 rounded-lg hover:bg-red-500/10"
             title="Sign out"
           >
-            <LogOut size={15} />
+            <LogOut size={14} />
           </button>
         </Link>
       </div>
@@ -183,44 +134,35 @@ function UserDropdown() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-dark-800 transition border border-dark-700/50"
+        className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-white/[0.04] transition-all border border-white/5"
       >
-        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-xs shrink-0">
+        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-[11px] shrink-0">
           {initials}
         </div>
         <div className="hidden sm:block text-left">
-          <p className="text-sm font-medium leading-tight truncate max-w-[120px]">{user?.fullName}</p>
-          <p className="text-[11px] text-gray-muted">{ROLE_LABELS[user?.role || ""] || user?.role}</p>
+          <p className="text-[13px] font-semibold leading-tight truncate max-w-[110px]">{user?.fullName}</p>
+          <p className="text-[10px] text-gray-muted">{ROLE_LABELS[user?.role || ""]}</p>
         </div>
-        <ChevronDown size={14} className={`text-gray-muted transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown size={13} className={`text-gray-muted transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-dark-900 border border-dark-700 rounded-xl shadow-2xl shadow-black/50 py-2 z-50">
-          <div className="px-4 py-3 border-b border-dark-800">
-            <p className="text-sm font-semibold truncate">{user?.fullName}</p>
-            <p className="text-xs text-gray-muted truncate">{user?.email}</p>
+        <div className="absolute right-0 top-full mt-2 w-56 bg-dark-900/95 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl shadow-black/60 py-2 z-50 animate-slide-down">
+          <div className="px-4 py-3 border-b border-white/5">
+            <p className="text-[13px] font-semibold truncate">{user?.fullName}</p>
+            <p className="text-[11px] text-gray-muted truncate">{user?.email}</p>
           </div>
-          <Link
-            href="/dashboard/profile"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-dark-800 hover:text-white transition"
-          >
-            <User size={16} /> My Profile
-          </Link>
-          <Link
-            href="/dashboard/settings"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-dark-800 hover:text-white transition"
-          >
-            <Settings size={16} /> Settings
-          </Link>
-          <div className="border-t border-dark-800 mt-1 pt-1">
-            <button
-              onClick={() => { setOpen(false); logout(); }}
-              className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition w-full"
-            >
-              <LogOut size={16} /> Sign Out
+          <div className="p-1.5">
+            <Link href="/dashboard/profile" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-gray-300 hover:bg-white/[0.04] hover:text-white transition rounded-xl">
+              <User size={15} /> My Profile
+            </Link>
+            <Link href="/dashboard/settings" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-gray-300 hover:bg-white/[0.04] hover:text-white transition rounded-xl">
+              <Settings size={15} /> Settings
+            </Link>
+          </div>
+          <div className="p-1.5 border-t border-white/5">
+            <button onClick={() => { setOpen(false); logout(); }} className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-400 hover:bg-red-500/5 transition rounded-xl w-full">
+              <LogOut size={15} /> Sign Out
             </button>
           </div>
         </div>
@@ -229,22 +171,79 @@ function UserDropdown() {
   );
 }
 
-// ─── Notification Bell (placeholder) ────────────────────
+// ─── Notification Bell ──────────────────────────────────
 function NotificationBell() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const notifications = [
+    { id: 1, title: "Welcome to TradeOS", desc: "Your account is ready. Start by creating your first deal.", time: "Just now", unread: true, icon: "🎉" },
+    { id: 2, title: "Complete your profile", desc: "Add your phone number and verify your email to unlock all features.", time: "1h ago", unread: true, icon: "👤" },
+    { id: 3, title: "New feature: Commission trees", desc: "Brokers can now create and lock commission allocation trees.", time: "2d ago", unread: false, icon: "🌳" },
+  ];
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
   return (
-    <button className="relative p-2.5 rounded-lg border border-dark-700/50 hover:bg-dark-800 transition text-gray-muted hover:text-white">
-      <Bell size={18} />
-      {/* Unread indicator */}
-      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-gold-500 rounded-full" />
-    </button>
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className={`relative p-2.5 rounded-xl border border-white/5 transition-all ${open ? "bg-white/[0.06] text-white" : "hover:bg-white/[0.04] text-gray-muted hover:text-white"}`}
+      >
+        <Bell size={17} strokeWidth={1.5} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold-500 rounded-full text-[9px] font-bold text-dark-950 flex items-center justify-center shadow-sm shadow-gold-500/30">
+            {unreadCount}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-80 bg-dark-900/95 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden z-50 animate-slide-down">
+          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+            <p className="text-[13px] font-semibold">Notifications</p>
+            {unreadCount > 0 && (
+              <span className="text-[10px] font-bold text-gold-500 bg-gold-500/10 px-2 py-0.5 rounded-full">{unreadCount} new</span>
+            )}
+          </div>
+          <div className="max-h-80 overflow-y-auto">
+            {notifications.map((n) => (
+              <div key={n.id} className="px-5 py-3.5 hover:bg-white/[0.02] transition cursor-pointer border-b border-white/[0.02] last:border-0 group">
+                <div className="flex items-start gap-3">
+                  <span className="text-lg mt-0.5 shrink-0">{n.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[13px] font-medium leading-snug">{n.title}</p>
+                      {n.unread && <div className="w-1.5 h-1.5 rounded-full bg-gold-500 shrink-0" />}
+                    </div>
+                    <p className="text-[11px] text-gray-muted mt-0.5 leading-relaxed">{n.desc}</p>
+                    <p className="text-[10px] text-dark-500 mt-1.5 font-medium">{n.time}</p>
+                  </div>
+                  <ArrowRight size={12} className="text-dark-600 group-hover:text-gold-500 transition shrink-0 mt-1" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="px-5 py-3 border-t border-white/5 text-center">
+            <button className="text-[11px] font-medium text-gold-500 hover:text-gold-400 transition">Mark all as read</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
 // ─── Top Navbar ─────────────────────────────────────────
 function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {
   const pathname = usePathname();
-
-  // Breadcrumb from pathname
   const segments = pathname.split("/").filter(Boolean);
   const breadcrumbs = segments.map((s, i) => ({
     label: s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, " "),
@@ -253,21 +252,16 @@ function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {
   }));
 
   return (
-    <header className="sticky top-0 z-40 bg-dark-950/80 backdrop-blur-xl border-b border-dark-800">
-      <div className="flex items-center justify-between h-16 px-4 md:px-8">
+    <header className="sticky top-0 z-40 bg-dark-950/70 backdrop-blur-xl border-b border-white/[0.04]">
+      <div className="flex items-center justify-between h-14 px-4 md:px-8">
         <div className="flex items-center gap-4">
-          {/* Mobile hamburger */}
-          <button
-            onClick={onMenuClick}
-            className="md:hidden p-2 border border-dark-700 rounded-lg text-gold-500 hover:bg-dark-800 transition"
-          >
-            <Menu size={20} />
+          <button onClick={onMenuClick} className="md:hidden p-2 border border-white/5 rounded-xl text-gold-500 hover:bg-white/[0.04] transition">
+            <Menu size={18} />
           </button>
-          {/* Breadcrumbs */}
-          <nav className="hidden sm:flex items-center gap-1.5 text-sm">
+          <nav className="hidden sm:flex items-center gap-1.5 text-[13px]">
             {breadcrumbs.map((b, i) => (
               <React.Fragment key={b.href}>
-                {i > 0 && <span className="text-dark-600">/</span>}
+                {i > 0 && <span className="text-dark-600 mx-0.5">/</span>}
                 {b.isLast ? (
                   <span className="text-white font-medium">{b.label}</span>
                 ) : (
@@ -278,7 +272,7 @@ function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <NotificationBell />
           <UserDropdown />
         </div>
@@ -287,26 +281,24 @@ function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {
   );
 }
 
-// ─── Dashboard Layout ───────────────────────────────────
+// ─── Layout ─────────────────────────────────────────────
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <ProtectedRoute>
       <div className="flex flex-col md:flex-row min-h-screen">
-        {/* Desktop sidebar */}
-        <aside className="hidden md:flex flex-col w-64 h-screen glass-panel sticky top-0 border-r border-dark-800 shrink-0">
+        <aside className="hidden md:flex flex-col w-60 h-screen glass-panel sticky top-0 border-r border-white/[0.04] shrink-0">
           <SidebarContent />
         </aside>
 
-        {/* Mobile drawer overlay */}
         {mobileOpen && (
           <div className="fixed inset-0 z-50 md:hidden">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-            <aside className="absolute left-0 top-0 h-full w-72 bg-dark-900 border-r border-dark-800 flex flex-col animate-in slide-in-from-left duration-200">
+            <aside className="absolute left-0 top-0 h-full w-72 bg-dark-900 border-r border-white/[0.04] flex flex-col animate-slide-down">
               <div className="flex items-center justify-end p-4">
-                <button onClick={() => setMobileOpen(false)} className="p-2 text-gray-muted hover:text-white transition">
-                  <X size={20} />
+                <button onClick={() => setMobileOpen(false)} className="p-2 text-gray-muted hover:text-white transition rounded-xl hover:bg-white/[0.04]">
+                  <X size={18} />
                 </button>
               </div>
               <SidebarContent onNavClick={() => setMobileOpen(false)} />
@@ -314,7 +306,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         )}
 
-        {/* Main content */}
         <div className="flex-1 flex flex-col min-h-screen">
           <TopNavbar onMenuClick={() => setMobileOpen(true)} />
           <main className="flex-1 overflow-x-hidden overflow-y-auto">{children}</main>
