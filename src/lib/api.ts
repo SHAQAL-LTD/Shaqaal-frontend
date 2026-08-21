@@ -1,8 +1,8 @@
 import type { AuthResponse, ApiError as ApiErrorType } from "./types";
+import type * as T from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
 
-// ─── Token Storage ──────────────────────────────────────
 const TOKEN_KEY = "shaqal_access_token";
 const REFRESH_KEY = "shaqal_refresh_token";
 
@@ -26,14 +26,12 @@ export function clearTokens(): void {
   localStorage.removeItem(REFRESH_KEY);
 }
 
-// ─── Refresh Token Lock ─────────────────────────────────
 let refreshPromise: Promise<AuthResponse> | null = null;
 
 async function refreshAccessToken(): Promise<AuthResponse> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) throw new Error("No refresh token");
   if (refreshPromise) return refreshPromise;
-
   refreshPromise = (async () => {
     try {
       const res = await fetch(`${API_URL}/auth/refresh`, {
@@ -49,11 +47,9 @@ async function refreshAccessToken(): Promise<AuthResponse> {
       refreshPromise = null;
     }
   })();
-
   return refreshPromise;
 }
 
-// ─── Custom Error ───────────────────────────────────────
 export class ApiClientError extends Error {
   status: number;
   errorCode: string;
@@ -67,7 +63,6 @@ export class ApiClientError extends Error {
   }
 }
 
-// ─── Core Request Function ──────────────────────────────
 async function request<T>(path: string, options: {
   method?: string;
   body?: unknown;
@@ -75,14 +70,12 @@ async function request<T>(path: string, options: {
   headers?: Record<string, string>;
 } = {}): Promise<T> {
   const { body, params, headers: customHeaders, method = "GET" } = options;
-
   const url = new URL(`${API_URL}${path}`);
   if (params) {
     Object.entries(params).forEach(([k, v]) => {
       if (v !== undefined) url.searchParams.set(k, String(v));
     });
   }
-
   const token = getAccessToken();
   const headers: Record<string, string> = { ...customHeaders };
   if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -94,7 +87,6 @@ async function request<T>(path: string, options: {
     body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
   });
 
-  // Auto-refresh on 401
   if (res.status === 401 && getRefreshToken()) {
     try {
       await refreshAccessToken();
@@ -115,29 +107,25 @@ async function request<T>(path: string, options: {
   }
 
   if (res.status === 204) return undefined as T;
-
   if (!res.ok) {
     let err: ApiErrorType;
-    try {
-      err = await res.json();
-    } catch {
+    try { err = await res.json(); } catch {
       err = { type: "", title: "Error", status: res.status, errorCode: "UNKNOWN", detail: res.statusText };
     }
     throw new ApiClientError(err);
   }
-
   const text = await res.text();
   if (!text) return undefined as T;
   return JSON.parse(text) as T;
 }
 
-// ─── API Client ─────────────────────────────────────────
+
 export const api = {
   auth: {
     register: (data: { fullName: string; email: string; phone: string; password: string; role: string; country: string }) =>
-      request<AuthResponse>("/auth/register", { method: "POST", body: data, headers: { "Idempotency-Key": crypto.randomUUID() } }),
+      request<T.AuthResponse>("/auth/register", { method: "POST", body: data, headers: { "Idempotency-Key": crypto.randomUUID() } }),
     login: (data: { email: string; password: string }) =>
-      request<AuthResponse>("/auth/login", { method: "POST", body: data }),
+      request<T.AuthResponse>("/auth/login", { method: "POST", body: data }),
     refresh: () => refreshAccessToken(),
     logout: () => { clearTokens(); },
     forgotPassword: (email: string) =>
@@ -146,36 +134,64 @@ export const api = {
       request<void>("/auth/reset-password", { method: "POST", body: { token, newPassword } }),
   },
   me: {
-    get: () => request<import("./types").UserProfile>("/me"),
+    get: () => request<T.UserProfile>("/me"),
     patch: (data: { fullName?: string; phone?: string }) =>
-      request<import("./types").UserProfile>("/me", { method: "PATCH", body: data }),
+      request<T.UserProfile>("/me", { method: "PATCH", body: data }),
   },
   deals: {
     list: (page = 0, size = 20) =>
-      request<import("./types").PageResponse<import("./types").Deal>>("/deals", { params: { page, size } }),
-    get: (id: string) => request<import("./types").Deal>(`/deals/${id}`),
-    create: (data: import("./types").CreateDealRequest) =>
-      request<import("./types").Deal>("/deals", { method: "POST", body: data, headers: { "Idempotency-Key": crypto.randomUUID() } }),
+      request<T.PageResponse<T.Deal>>("/deals", { params: { page, size } }),
+    get: (id: string) => request<T.Deal>(`/deals/${id}`),
+    create: (data: T.CreateDealRequest) =>
+      request<T.Deal>("/deals", { method: "POST", body: data, headers: { "Idempotency-Key": crypto.randomUUID() } }),
     advance: (id: string, notes?: string) =>
-      request<import("./types").Deal>(`/deals/${id}/advance`, { method: "POST", params: { notes } }),
+      request<T.Deal>(`/deals/${id}/advance`, { method: "POST", params: { notes } }),
   },
   organizations: {
     list: (page = 0, size = 20) =>
-      request<import("./types").PageResponse<import("./types").Organization>>("/organizations", { params: { page, size } }),
-    get: (id: string) => request<import("./types").Organization>(`/organizations/${id}`),
+      request<T.PageResponse<T.Organization>>("/organizations", { params: { page, size } }),
+    get: (id: string) => request<T.Organization>(`/organizations/${id}`),
     create: (data: { name: string; legalName?: string; country: string }) =>
-      request<import("./types").Organization>("/organizations", { method: "POST", body: data }),
-    members: (id: string) => request<import("./types").OrganizationMember[]>(`/organizations/${id}/members`),
+      request<T.Organization>("/organizations", { method: "POST", body: data }),
+    members: (id: string) => request<T.OrganizationMember[]>(`/organizations/${id}/members`),
   },
   documents: {
     upload: (dealId: string, stage: string, type: string, file: File) => {
       const fd = new FormData();
       fd.append("file", file);
-      return request<import("./types").Document>(`/deals/${dealId}/documents`, { method: "POST", body: fd, params: { stage, type } });
+      return request<T.Document>(`/deals/${dealId}/documents`, { method: "POST", body: fd, params: { stage, type } });
+    },
+    download: async (dealId: string, documentId: string) => {
+      const token = getAccessToken();
+      const url = `${API_URL}/deals/${dealId}/documents/${documentId}/content`;
+      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new Error("Download failed");
+      return res.blob();
     },
   },
+  kyc: {
+    submit: (docTypes: string[], files: File[], organizationId?: string) => {
+      const fd = new FormData();
+      files.forEach(f => fd.append("files", f));
+      const params: Record<string, string> = { docTypes: docTypes.join(",") };
+      if (organizationId) params.organizationId = organizationId;
+      return request<T.KycSubmission>("/kyc/submissions", { method: "POST", body: fd, params });
+    },
+    get: (id: string) => request<T.KycSubmission>(`/kyc/submissions/${id}`),
+    listMine: () => request<T.KycSubmission[]>("/kyc/submissions/me"),
+    cancelOpen: () => request<void>("/kyc/submissions/open", { method: "DELETE" }),
+  },
+  compliance: {
+    queue: (status = "pending") => request<T.ComplianceReview[]>("/compliance/reviews", { params: { status } }),
+    get: (id: string) => request<T.ComplianceReviewDetail>(`/compliance/reviews/${id}`),
+    decide: (id: string, decision: string, note?: string) =>
+      request<T.ComplianceReviewDetail>(`/compliance/reviews/${id}/decision`, { method: "POST", body: { decision, note } }),
+  },
+  audit: {
+    getDealAudit: (dealId: string) => request<T.AuditEvent[]>(`/deals/${dealId}/audit`),
+    exportDeal: (dealId: string) => request<{ dealConfiguration: T.Deal; timeline: T.AuditEvent[] }>(`/deals/${dealId}/audit/export`),
+  },
   countries: {
-    profile: (code: string) =>
-      request<{ countryCode: string; displayName: string; fieldsJson: unknown; requiredDocTypes: string[] }>(`/countries/${code}/compliance-fields`),
+    profile: (code: string) => request<T.CountryProfile>(`/countries/${code}/compliance-fields`),
   },
 };

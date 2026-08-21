@@ -148,6 +148,71 @@ export interface AuditEvent {
   afterJson: Record<string, unknown> | null;
 }
 
+
+// ─── KYC Submissions ─────────────────────────────────
+export interface KycDocument {
+  id: string;
+  docType: string;
+  fileName: string;
+  contentType: string;
+  byteSize: number;
+  contentSha256: string;
+  createdAt: string;
+}
+
+export interface KycSubmission {
+  id: string;
+  userId: string;
+  organizationId: string | null;
+  status: string;
+  reviewerId: string | null;
+  reviewerNote: string | null;
+  submittedAt: string;
+  reviewedAt: string | null;
+  createdAt: string;
+  documents: KycDocument[];
+}
+
+// ─── Compliance Reviews ──────────────────────────────
+export interface ComplianceReview {
+  id: string;
+  userId: string;
+  userFullName: string;
+  userEmail: string;
+  organizationId: string | null;
+  status: string;
+  submittedAt: string;
+  documentCount: number;
+}
+
+export interface ComplianceReviewDetail {
+  submission: KycSubmission;
+  submitterFullName: string;
+  submitterEmail: string;
+  submitterPhone: string;
+  submitterCountry: string;
+  submitterRole: string;
+}
+
+// ─── Country Compliance ──────────────────────────────
+export interface CountryField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  pattern: string | null;
+  maxLength: number | null;
+}
+
+export interface CountryProfile {
+  countryCode: string;
+  displayName: string;
+  schemaVersion: number;
+  fields: CountryField[];
+  requiredDocTypes: string[];
+  baselineDocTypes: string[];
+}
+
 // ─── Pagination ────────────────────────────────────────
 export interface PageResponse<T> {
   content: T[];
