@@ -231,8 +231,6 @@ export const api = {
         { method: "POST", headers: { "Idempotency-Key": crypto.randomUUID() } }
       ),
   },
-    },
-  },
 
   payments: {
     initializePaystack: (data: { dealId: string; amountUsd: number; paymentType: string; description?: string }) =>
