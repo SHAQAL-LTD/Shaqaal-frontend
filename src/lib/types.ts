@@ -132,6 +132,7 @@ export interface CommissionNode {
   allocationValue: number;
   walletLabel: string | null;
   buyingSide: boolean;
+  createdAt: string;
 }
 
 // ─── Audit ─────────────────────────────────────────────

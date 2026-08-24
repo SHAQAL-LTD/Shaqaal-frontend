@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import hero from "hero.jpg";
 import {
   ShieldCheck,
   ArrowRight,
@@ -142,7 +143,7 @@ export default function LandingPage() {
             <div className="relative rounded-2xl overflow-hidden border border-white/5 bg-dark-900 aspect-[4/3] w-full shadow-2xl shadow-black/40">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1588611910243-d8c9735d4653?q=80&w=1200&auto=format&fit=crop"
+                src="hero.jpg"
                 alt="Gold Bars Validation"
                 className="w-full h-full object-cover opacity-90"
               />
@@ -249,8 +250,8 @@ export default function LandingPage() {
               &copy; {new Date().getFullYear()} Shaqal Ltd. All rights reserved.
             </p>
             <div className="flex items-center gap-6 text-[13px] text-gray-muted">
-              <a href="#" className="hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms</a>
+              <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+              <a href="/terms" className="hover:text-white transition-colors">Terms</a>
               <a href="#" className="hover:text-white transition-colors">Security</a>
             </div>
           </div>

@@ -21,6 +21,8 @@ import {
   ClipboardList,
   Scale,
   ArrowRight,
+  CreditCard,
+  Users,
 } from "lucide-react";
 
 // ─── Role-Based Navigation ──────────────────────────────
@@ -38,6 +40,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard/compliance", label: "Compliance", icon: ShieldCheck, roles: ["compliance_officer", "admin"] },
   { href: "/dashboard/audit", label: "Audit Trail", icon: ClipboardList, roles: ["compliance_officer", "admin", "broker"] },
   { href: "/dashboard/kyc", label: "KYC / Verification", icon: Scale, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
+  { href: "/dashboard/payments", label: "Payments", icon: CreditCard, roles: ["supplier", "buyer", "broker", "financier", "facilitator", "admin"] },
+  { href: "/dashboard/admin", label: "Admin Panel", icon: Users, roles: ["admin"] },
   { href: "/dashboard/settings", label: "Settings", icon: Settings, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"] },
 ];
 
@@ -171,9 +175,12 @@ function UserDropdown() {
   );
 }
 
-// ─── Notification Bell ──────────────────────────────────
+
+// Notification Bell (live)
 function NotificationBell() {
   const [open, setOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -184,13 +191,22 @@ function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const notifications = [
-    { id: 1, title: "Welcome to TradeOS", desc: "Your account is ready. Start by creating your first deal.", time: "Just now", unread: true, icon: "🎉" },
-    { id: 2, title: "Complete your profile", desc: "Add your phone number and verify your email to unlock all features.", time: "1h ago", unread: true, icon: "👤" },
-    { id: 3, title: "New feature: Commission trees", desc: "Brokers can now create and lock commission allocation trees.", time: "2d ago", unread: false, icon: "🌳" },
-  ];
+  useEffect(() => {
+    fetch("/api/notifications/unread-count").then(r => r.ok ? r.json() : { count: 0 }).then(d => setUnreadCount(d.count)).catch(() => {});
+  }, [open]);
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
+  useEffect(() => {
+    if (open) {
+      fetch("/api/notifications?page=0&size=20").then(r => r.ok ? r.json() : { content: [] }).then(d => setNotifications(d.content || [])).catch(() => {});
+    }
+  }, [open]);
+
+  const handleMarkAllRead = () => {
+    fetch("/api/notifications/read-all", { method: "POST" }).then(() => {
+      setUnreadCount(0);
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    }).catch(() => {});
+  };
 
   return (
     <div className="relative" ref={ref}>
@@ -215,31 +231,34 @@ function NotificationBell() {
             )}
           </div>
           <div className="max-h-80 overflow-y-auto">
+            {notifications.length === 0 && (
+              <div className="px-5 py-8 text-center text-[12px] text-gray-muted">No notifications yet</div>
+            )}
             {notifications.map((n) => (
               <div key={n.id} className="px-5 py-3.5 hover:bg-white/[0.02] transition cursor-pointer border-b border-white/[0.02] last:border-0 group">
                 <div className="flex items-start gap-3">
-                  <span className="text-lg mt-0.5 shrink-0">{n.icon}</span>
+                  <span className="text-lg mt-0.5 shrink-0">🔔</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-[13px] font-medium leading-snug">{n.title}</p>
-                      {n.unread && <div className="w-1.5 h-1.5 rounded-full bg-gold-500 shrink-0" />}
+                      {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-gold-500 shrink-0" />}
                     </div>
-                    <p className="text-[11px] text-gray-muted mt-0.5 leading-relaxed">{n.desc}</p>
-                    <p className="text-[10px] text-dark-500 mt-1.5 font-medium">{n.time}</p>
+                    <p className="text-[11px] text-gray-muted mt-0.5 leading-relaxed">{n.message}</p>
+                    <p className="text-[10px] text-dark-500 mt-1.5 font-medium">{n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ""}</p>
                   </div>
-                  <ArrowRight size={12} className="text-dark-600 group-hover:text-gold-500 transition shrink-0 mt-1" />
                 </div>
               </div>
             ))}
           </div>
           <div className="px-5 py-3 border-t border-white/5 text-center">
-            <button className="text-[11px] font-medium text-gold-500 hover:text-gold-400 transition">Mark all as read</button>
+            <button onClick={handleMarkAllRead} className="text-[11px] font-medium text-gold-500 hover:text-gold-400 transition">Mark all as read</button>
           </div>
         </div>
       )}
     </div>
   );
 }
+
 
 // ─── Top Navbar ─────────────────────────────────────────
 function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {

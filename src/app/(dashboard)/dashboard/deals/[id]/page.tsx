@@ -20,6 +20,7 @@ import {
   Globe,
   CheckCircle,
   Lock,
+  FileSignature,
 } from "lucide-react";
 
 const STAGES = [
@@ -57,7 +58,8 @@ export default function DealDetailPage() {
   }, [dealId]);
 
   async function loadDeal() {
-    setLoading(true); setError("");
+    setLoading(true);
+    setError("");
     try {
       const d = await api.deals.get(dealId);
       setDeal(d);
@@ -82,11 +84,12 @@ export default function DealDetailPage() {
   }
 
   const currentIdx = deal ? stageIndex(deal.currentStage) : 0;
-  const progress = ((currentIdx) / (STAGES.length - 1)) * 100;
+  const progress = (currentIdx / (STAGES.length - 1)) * 100;
 
   const quickLinks = [
     { href: `/dashboard/deals/${dealId}/parties`, label: "Parties", icon: Users, desc: "Manage deal organizations" },
     { href: `/dashboard/deals/${dealId}/documents`, label: "Documents", icon: FileText, desc: "Deal vault & uploads" },
+    { href: `/dashboard/deals/${dealId}/contracts`, label: "Contracts", icon: FileSignature, desc: "Generate NCNDA, IMFPA, SPA" },
     { href: `/dashboard/deals/${dealId}/audit`, label: "Audit Trail", icon: ClipboardList, desc: "Stage transition history" },
     { href: `/dashboard/deals/${dealId}/commission`, label: "Commission", icon: Scale, desc: "Allocation tree" },
   ];
@@ -198,7 +201,7 @@ export default function DealDetailPage() {
           </div>
 
           {/* Quick Links */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {quickLinks.map((link) => (
               <Link
                 key={link.href}

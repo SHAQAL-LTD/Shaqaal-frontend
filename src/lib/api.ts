@@ -156,6 +156,8 @@ export const api = {
     members: (id: string) => request<T.OrganizationMember[]>(`/organizations/${id}/members`),
   },
   documents: {
+    list: (dealId: string) =>
+      request<T.Document[]>(`/deals/${dealId}/documents`),
     upload: (dealId: string, stage: string, type: string, file: File) => {
       const fd = new FormData();
       fd.append("file", file);
@@ -194,5 +196,78 @@ export const api = {
   },
   countries: {
     profile: (code: string) => request<T.CountryProfile>(`/countries/${code}/compliance-fields`),
+  },
+  dealParties: {
+    list: (dealId: string) => request<T.DealParty[]>(`/deals/${dealId}/parties`),
+    add: (dealId: string, data: { organizationId: string; partyRole: string }) =>
+      request<T.DealParty>(`/deals/${dealId}/parties`, { method: "POST", body: data, headers: { "Idempotency-Key": crypto.randomUUID() } }),
+    remove: (dealId: string, organizationId: string) =>
+      request<void>(`/deals/${dealId}/parties/${organizationId}`, { method: "DELETE" }),
+  },
+  commissionTree: {
+    get: (dealId: string) => request<T.CommissionTree>(`/deals/${dealId}/commission-tree`),
+    create: (dealId: string) =>
+      request<T.CommissionTree>(`/deals/${dealId}/commission-tree`, { method: "POST", headers: { "Idempotency-Key": crypto.randomUUID() } }),
+    lock: (treeId: string) =>
+      request<T.CommissionTree>(`/commission/trees/${treeId}/lock`, { method: "POST" }),
+  },
+  commissionNodes: {
+    list: (treeId: string) => request<T.CommissionNode[]>(`/commission/trees/${treeId}/nodes`),
+    add: (treeId: string, data: {
+      organizationId: string;
+      parentNodeId?: string;
+      allocationType: string;
+      allocationValue: number;
+      walletLabel?: string;
+      buyingSide: boolean;
+    }) => request<T.CommissionNode>(`/commission/trees/${treeId}/nodes`, { method: "POST", body: data, headers: { "Idempotency-Key": crypto.randomUUID() } }),
+    remove: (treeId: string, nodeId: string) =>
+      request<void>(`/commission/trees/${treeId}/nodes/${nodeId}`, { method: "DELETE" }),
+  },
+  contracts: {
+    render: (dealId: string, templateId: string) =>
+      request<{ id: string; stage: string; documentType: string; fileName: string }>(
+        `/deals/${dealId}/contracts/${templateId}/render`,
+        { method: "POST", headers: { "Idempotency-Key": crypto.randomUUID() } }
+      ),
+  },
+    },
+  },
+
+  payments: {
+    initializePaystack: (data: { dealId: string; amountUsd: number; paymentType: string; description?: string }) =>
+      request<{ paymentId: string; paystackReference: string; authorizationUrl: string; accessCode: string; usdtAddress: string | null }>(
+        "/payments/paystack/initialize", { method: "POST", body: data }
+      ),
+    initializeUsdt: (data: { dealId: string; amountUsd: number; paymentType: string; description?: string }, network = "TRC20") =>
+      request<{ paymentId: string; paystackReference: string | null; authorizationUrl: string | null; accessCode: string | null; usdtAddress: string }>(
+        "/payments/usdt/initialize?network=" + network, { method: "POST", body: data }
+      ),
+    listByDeal: (dealId: string) => request<any[]>("/payments/deal/" + dealId),
+    listMine: (page = 0, size = 20) => request<any>("/payments/my?page=" + page + "&size=" + size),
+    get: (id: string) => request<any>("/payments/" + id),
+  },
+
+  notifications: {
+    list: (page = 0, size = 20) => request<{ content: any[]; totalElements: number }>("/notifications?page=" + page + "&size=" + size),
+    unreadCount: () => request<{ count: number }>("/notifications/unread-count"),
+    markRead: (id: string) => request<void>("/notifications/" + id + "/read", { method: "POST" }),
+    markAllRead: () => request<void>("/notifications/read-all", { method: "POST" }),
+  },
+
+  admin: {
+    listUsers: (search?: string, role?: string, page = 0, size = 20) => {
+      const params: Record<string, any> = { page, size };
+      if (search) params.search = search;
+      if (role) params.role = role;
+      return request<any>("/admin/users", { params });
+    },
+    deactivateUser: (userId: string, reason?: string) =>
+      request<void>("/admin/users/" + userId + "/deactivate", { method: "POST", body: { reason: reason || "Admin action" } }),
+    reactivateUser: (userId: string) =>
+      request<void>("/admin/users/" + userId + "/reactivate", { method: "POST" }),
+    updateVerification: (userId: string, status: string, note?: string) =>
+      request<void>("/admin/users/" + userId + "/verification", { method: "PATCH", body: { status, note: note || "" } }),
+    stats: () => request<any>("/admin/stats"),
   },
 };
