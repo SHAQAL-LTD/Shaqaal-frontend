@@ -2,66 +2,58 @@
 
 import React from "react";
 import Link from "next/link";
-import { Diamond, ArrowLeft } from "lucide-react";
+import { Diamond } from "lucide-react";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-dark-950 p-4">
-      <div className="max-w-3xl mx-auto py-12">
-        <Link href="/" className="inline-flex items-center gap-2 text-gray-muted hover:text-white mb-8 transition">
-          <ArrowLeft size={16} /> Back to home
-        </Link>
-
-        <div className="flex items-center gap-3 mb-8">
-          <Diamond size={28} className="text-gold-500" strokeWidth={1.5} />
-          <span className="text-2xl font-bold">Shaqal <span className="text-gold-500">TradeOS</span></span>
+    <div className="min-h-screen">
+      <header className="border-b border-white/[0.04] bg-dark-950/70 backdrop-blur-xl sticky top-0 z-40">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center">
+              <Diamond size={15} className="text-dark-950" strokeWidth={2} />
+            </div>
+            <span className="text-sm font-bold text-gradient-gold">SHAQAL</span>
+          </Link>
+          <Link href="/login" className="text-[12px] text-gray-muted hover:text-white transition">Back to Login</Link>
         </div>
-
-        <h1 className="text-3xl font-bold mb-6">Terms of Service</h1>
-        <p className="text-sm text-gray-muted mb-8">Last updated: August 24, 2026</p>
-
-        <div className="space-y-6 text-sm leading-relaxed text-gray-300">
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using Shaqal TradeOS ("the Platform"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Platform.</p>
+      </header>
+      <main className="max-w-4xl mx-auto px-4 md:px-8 py-12 space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Terms of Service</h1>
+          <p className="text-[13px] text-gray-muted">Last updated: August 2026</p>
+        </div>
+        <div className="space-y-6 text-[14px] leading-relaxed text-gray-300">
+          <section className="glass-panel rounded-2xl p-6 space-y-3">
+            <h2 className="text-[15px] font-semibold text-white">1. Acceptance of Terms</h2>
+            <p>By accessing or using the Shaqal TradeOS platform, you agree to be bound by these Terms of Service. If you do not agree, do not use the Platform.</p>
           </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">2. Description of Service</h2>
-            <p>Shaqal TradeOS is a digital trade operating system for African mineral commodities. The Platform facilitates deal management, document handling, compliance verification, and trade settlement between buyers, suppliers, brokers, and financiers.</p>
+          <section className="glass-panel rounded-2xl p-6 space-y-3">
+            <h2 className="text-[15px] font-semibold text-white">2. Platform Description</h2>
+            <p>Shaqal TradeOS is a digital trade facilitation platform for mineral commodity trading across Africa. It provides deal pipeline management, document management, payment processing (fiat and crypto), and compliance verification services.</p>
           </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">3. User Accounts</h2>
-            <p>You must provide accurate, complete information during registration. You are responsible for maintaining the confidentiality of your account credentials. You must be at least 18 years of age to use the Platform.</p>
+          <section className="glass-panel rounded-2xl p-6 space-y-3">
+            <h2 className="text-[15px] font-semibold text-white">3. User Eligibility</h2>
+            <p>You must be at least 18 years old and have the legal authority to enter into binding agreements. You must complete KYC verification before engaging in transactions.</p>
           </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">4. KYC and Compliance</h2>
-            <p>All users must complete Know Your Customer (KYC) verification before engaging in trade activities. The Platform reserves the right to suspend accounts that fail verification or violate compliance requirements.</p>
+          <section className="glass-panel rounded-2xl p-6 space-y-3">
+            <h2 className="text-[15px] font-semibold text-white">4. Account Security</h2>
+            <p>You are responsible for maintaining the confidentiality of your account credentials. Shaqal implements rate limiting, JWT authentication, and session management to protect your account.</p>
           </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">5. Payments and Settlements</h2>
-            <p>All payments are processed through integrated payment gateways (Paystack for fiat, blockchain for USDT). The Platform charges a platform fee on completed transactions. Users agree to the payment terms displayed at the time of transaction.</p>
+          <section className="glass-panel rounded-2xl p-6 space-y-3">
+            <h2 className="text-[15px] font-semibold text-white">5. Payment Terms</h2>
+            <p>All payments are processed through integrated payment gateways (Paystack for fiat, USDT for crypto). Platform fees apply as configured. Escrow mechanisms protect both buyers and suppliers during deal settlement.</p>
           </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">6. Prohibited Activities</h2>
-            <p>Users may not: (a) use the Platform for illegal activities; (b) manipulate deal information; (c) circumvent KYC requirements; (d) attempt to access other users' accounts; (e) upload malicious content.</p>
+          <section className="glass-panel rounded-2xl p-6 space-y-3">
+            <h2 className="text-[15px] font-semibold text-white">6. Dispute Resolution</h2>
+            <p>Any disputes shall be resolved through the Platform compliance review process before escalation to external arbitration under applicable trade laws.</p>
           </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">7. Limitation of Liability</h2>
-            <p>The Platform is provided "as is" without warranties. Shaqal TradeOS is not liable for any losses arising from trade transactions between users. The Platform facilitates connections but does not guarantee trade outcomes.</p>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold text-white mb-3">8. Governing Law</h2>
-            <p>These Terms are governed by the laws of Nigeria. Disputes shall be resolved through arbitration in Lagos, Nigeria.</p>
+          <section className="glass-panel rounded-2xl p-6 space-y-3">
+            <h2 className="text-[15px] font-semibold text-white">7. Limitation of Liability</h2>
+            <p>Shaqal Ltd. provides the Platform on an as-is basis. We are not liable for losses arising from trade transactions between parties, except as explicitly covered by our escrow and payment protection mechanisms.</p>
           </section>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

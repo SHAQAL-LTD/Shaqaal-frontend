@@ -1,111 +1,174 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
-import { CreditCard, Loader2, AlertCircle, ArrowUpRight, ArrowDownRight, ExternalLink } from "lucide-react";
+import {
+  CreditCard,
+  ArrowLeft,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  Wallet,
+  Banknote,
+} from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
-  COMPLETED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  PENDING: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  PENDING: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
   PROCESSING: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  COMPLETED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   FAILED: "bg-red-500/10 text-red-400 border-red-500/20",
-  REFUNDED: "bg-gray-500/10 text-gray-400 border-gray-500/20",
 };
 
-const METHOD_LABELS: Record<string, string> = {
-  PAYSTACK: "Card / Bank",
-  USDT_TRC20: "USDT (TRC-20)",
-  USDT_ERC20: "USDT (ERC-20)",
+const STATUS_ICONS: Record<string, React.ElementType> = {
+  PENDING: Clock,
+  PROCESSING: Loader2,
+  COMPLETED: CheckCircle2,
+  FAILED: XCircle,
 };
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  useEffect(() => { loadPayments(); }, [page]);
-
-  async function loadPayments() {
+  useEffect(() => {
     setLoading(true);
-    setError("");
-    try {
-      const res = await api.payments.listMine(page, 20);
-      setPayments(res.content || []);
-      setTotalPages(res.totalPages || 0);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load payments");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (loading && payments.length === 0) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 size={32} className="animate-spin text-gold-500" />
-      </div>
-    );
-  }
+    api.payments
+      .listMine(page, 20)
+      .then((data: any) => {
+        setPayments(data.content || []);
+        setTotalPages(data.totalPages || 0);
+      })
+      .catch(() => setPayments([]))
+      .finally(() => setLoading(false));
+  }, [page]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Payment History</h1>
-        <p className="text-sm text-gray-muted">View all your transactions</p>
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+      <div className="flex items-center gap-3">
+        <Link href="/dashboard" className="p-2 rounded-xl hover:bg-white/[0.04] text-gray-muted hover:text-white transition">
+          <ArrowLeft size={18} />
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold">Payments</h1>
+          <p className="text-[13px] text-gray-muted">Track your payment history and transactions</p>
+        </div>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-          <AlertCircle size={16} className="text-red-400 shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
+      {!loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="glass-panel rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <CheckCircle2 size={18} className="text-emerald-400" />
+              </div>
+              <p className="text-[12px] text-gray-muted font-medium uppercase tracking-wider">Completed</p>
+            </div>
+            <p className="text-2xl font-bold">{payments.filter((p: any) => p.status === "COMPLETED").length}</p>
+          </div>
+          <div className="glass-panel rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Loader2 size={18} className="text-blue-400" />
+              </div>
+              <p className="text-[12px] text-gray-muted font-medium uppercase tracking-wider">Processing</p>
+            </div>
+            <p className="text-2xl font-bold">{payments.filter((p: any) => p.status === "PROCESSING").length}</p>
+          </div>
+          <div className="glass-panel rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 rounded-xl bg-gold-500/10 flex items-center justify-center">
+                <CreditCard size={18} className="text-gold-500" />
+              </div>
+              <p className="text-[12px] text-gray-muted font-medium uppercase tracking-wider">Total</p>
+            </div>
+            <p className="text-2xl font-bold">{payments.length}</p>
+          </div>
         </div>
       )}
 
-      <div className="glass-panel rounded-2xl p-6">
-        {payments.length === 0 ? (
-          <div className="text-center py-12">
-            <CreditCard size={48} className="text-dark-600 mx-auto mb-4" />
-            <p className="text-gray-muted">No payments yet</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {payments.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 p-3 bg-dark-800/50 rounded-xl hover:bg-dark-800 transition">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${p.paymentType === "ADVANCE" ? "bg-gold-500/10" : "bg-emerald-500/10"}`}>
-                  {p.paymentType === "ADVANCE"
-                    ? <ArrowUpRight size={18} className="text-gold-500" />
-                    : <ArrowDownRight size={18} className="text-emerald-400" />
-                  }
+      {loading && (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="glass-panel rounded-2xl p-5 animate-pulse">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-dark-700" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-dark-700 rounded w-1/3" />
+                  <div className="h-3 bg-dark-700 rounded w-1/5" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{p.description || p.paymentType}</p>
-                  <p className="text-[11px] text-gray-muted">
-                    {METHOD_LABELS[p.paymentMethod] || p.paymentMethod} &middot; {new Date(p.createdAt).toLocaleDateString()}
+                <div className="h-6 w-20 bg-dark-700 rounded-full" />
+                <div className="h-5 w-16 bg-dark-700 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && payments.length === 0 && (
+        <div className="glass-panel rounded-2xl p-12 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gold-500/10 flex items-center justify-center mx-auto mb-4">
+            <Wallet size={28} className="text-gold-500" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No payments yet</h3>
+          <p className="text-[13px] text-gray-muted max-w-md mx-auto">
+            Payments will appear here once you initiate a transaction for a deal.
+          </p>
+          <Link
+            href="/dashboard/deals"
+            className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-xl bg-gold-500 text-dark-950 font-semibold text-[13px] hover:bg-gold-400 transition"
+          >
+            <Banknote size={15} /> View Deals
+          </Link>
+        </div>
+      )}
+
+      {!loading && payments.length > 0 && (
+        <div className="space-y-3">
+          {payments.map((payment: any) => {
+            const StatusIcon = STATUS_ICONS[payment.status] || Clock;
+            const isAnimating = payment.status === "PROCESSING";
+            const statusClass = STATUS_COLORS[payment.status] || "";
+            return (
+              <div key={payment.id} className="glass-panel rounded-2xl p-5 hover:bg-white/[0.02] transition">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-dark-700 flex items-center justify-center shrink-0">
+                    <CreditCard size={18} className="text-gray-muted" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[13px] font-semibold truncate">{payment.paymentType || "Payment"}</p>
+                      <span className="text-[10px] text-gray-muted font-mono">{payment.paymentMethod}</span>
+                    </div>
+                    <p className="text-[11px] text-gray-muted mt-0.5">{payment.description || "Deal payment"}</p>
+                    <p className="text-[10px] text-dark-500 mt-1">
+                      {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : ""}
+                    </p>
+                  </div>
+                  <span className={"inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border " + statusClass}>
+                    <StatusIcon size={12} className={isAnimating ? "animate-spin" : ""} />
+                    {payment.status}
+                  </span>
+                  <p className="text-[15px] font-bold whitespace-nowrap">
+                    ${Number(payment.amountUsd || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold">${p.amountUsd}</p>
-                  <span className={`text-[11px] px-2 py-0.5 rounded-full border ${STATUS_COLORS[p.status] || "bg-dark-700 text-gray-muted"}`}>
-                    {p.status}
-                  </span>
-                </div>
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
+      )}
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-6">
-            <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
-              className="px-3 py-1 rounded-lg bg-dark-800 text-sm disabled:opacity-50 hover:bg-dark-700 transition">Prev</button>
-            <span className="text-sm text-gray-muted">{page + 1} / {totalPages}</span>
-            <button onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-              className="px-3 py-1 rounded-lg bg-dark-800 text-sm disabled:opacity-50 hover:bg-dark-700 transition">Next</button>
-          </div>
-        )}
-      </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-4">
+          <button onClick={() => setPage(Math.max(0, page - 1))} disabled={page === 0} className="px-3 py-1.5 rounded-lg text-[12px] font-medium border border-white/5 text-gray-muted hover:text-white hover:bg-white/[0.04] disabled:opacity-30 transition">Previous</button>
+          <span className="text-[12px] text-gray-muted">Page {page + 1} of {totalPages}</span>
+          <button onClick={() => setPage(Math.min(totalPages - 1, page + 1))} disabled={page >= totalPages - 1} className="px-3 py-1.5 rounded-lg text-[12px] font-medium border border-white/5 text-gray-muted hover:text-white hover:bg-white/[0.04] disabled:opacity-30 transition">Next</button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,143 +1,133 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
-import { useAuth } from "@/contexts/AuthContext";
-import { Shield, Loader2, AlertCircle, Search, UserX, UserCheck, BadgeCheck, X } from "lucide-react";
+import { Users, ArrowLeft, Search, UserCheck, UserX, Loader2 } from "lucide-react";
+
+const ROLE_COLORS: Record<string, string> = {
+  supplier: "bg-emerald-500/10 text-emerald-400",
+  buyer: "bg-blue-500/10 text-blue-400",
+  broker: "bg-purple-500/10 text-purple-400",
+  facilitator: "bg-orange-500/10 text-orange-400",
+  compliance_officer: "bg-gold-500/10 text-gold-500",
+  admin: "bg-red-500/10 text-red-400",
+  financier: "bg-cyan-500/10 text-cyan-400",
+};
 
 export default function AdminPage() {
-  const { user } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [stats, setStats] = useState<any>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const isAdmin = user?.role === "admin";
-
-  useEffect(() => {
-    if (isAdmin) {
-      loadData();
-      loadStats();
-    }
-  }, [isAdmin]);
-
-  async function loadData() {
+  const loadUsers = (q?: string) => {
     setLoading(true);
-    try {
-      const res = await api.admin.listUsers(search || undefined);
-      setUsers(res.content || []);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load users");
-    } finally {
-      setLoading(false);
-    }
-  }
+    api.admin
+      .listUsers({ search: q || undefined, page: 0, size: 50 })
+      .then((data: any) => setUsers(data.content || []))
+      .catch(() => setUsers([]))
+      .finally(() => setLoading(false));
+  };
 
-  async function loadStats() {
+  useEffect(() => { loadUsers(); }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    loadUsers(search);
+  };
+
+  const handleDeactivate = async (userId: string) => {
+    if (!confirm("Are you sure you want to deactivate this user?")) return;
+    setActionLoading(userId);
     try {
-      const s = await api.admin.stats();
-      setStats(s);
+      await api.admin.deactivateUser(userId, "Admin deactivation");
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, active: false } : u)));
     } catch {}
-  }
+    setActionLoading(null);
+  };
 
-  useEffect(() => {
-    const timer = setTimeout(() => { if (isAdmin) loadData(); }, 300);
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  if (!isAdmin) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <Shield size={48} className="text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Access Denied</h2>
-          <p className="text-gray-muted">Admin access required</p>
-        </div>
-      </div>
-    );
-  }
+  const handleReactivate = async (userId: string) => {
+    setActionLoading(userId);
+    try {
+      await api.admin.reactivateUser(userId);
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, active: true } : u)));
+    } catch {}
+    setActionLoading(null);
+  };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Admin Panel</h1>
-
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="glass-panel rounded-2xl p-4">
-            <p className="text-xs text-gray-muted mb-1">Total Users</p>
-            <p className="text-2xl font-bold">{stats.totalUsers}</p>
-          </div>
-          <div className="glass-panel rounded-2xl p-4">
-            <p className="text-xs text-gray-muted mb-1">Active Users</p>
-            <p className="text-2xl font-bold text-emerald-400">{stats.activeUsers}</p>
-          </div>
-          <div className="glass-panel rounded-2xl p-4">
-            <p className="text-xs text-gray-muted mb-1">Platform Fees</p>
-            <p className="text-2xl font-bold text-gold-500">${stats.totalPlatformFees}</p>
-          </div>
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+      <div className="flex items-center gap-3">
+        <Link href="/dashboard" className="p-2 rounded-xl hover:bg-white/[0.04] text-gray-muted hover:text-white transition">
+          <ArrowLeft size={18} />
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold">Admin Panel</h1>
+          <p className="text-[13px] text-gray-muted">Manage users, roles, and verification status</p>
         </div>
-      )}
-
-      {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-          <AlertCircle size={16} className="text-red-400 shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
-        </div>
-      )}
-
-      <div className="glass-panel rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex-1 relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-muted" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search users by name or email..."
-              className="w-full bg-dark-800 border border-dark-700 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-dark-500 focus:border-gold-500 outline-none"
-            />
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-gold-500" /></div>
-        ) : users.length === 0 ? (
-          <p className="text-center text-gray-muted py-8">No users found</p>
-        ) : (
-          <div className="space-y-2">
-            {users.map((u) => (
-              <div key={u.id} className="flex items-center gap-3 p-3 bg-dark-800/50 rounded-xl">
-                <div className="w-10 h-10 rounded-full bg-dark-700 flex items-center justify-center text-sm font-bold text-gold-500">
-                  {u.fullName?.charAt(0)?.toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{u.fullName}</p>
-                  <p className="text-[11px] text-gray-muted">{u.email} &middot; {u.role} &middot; {u.country}</p>
-                </div>
-                <span className={`text-[11px] px-2 py-0.5 rounded-full border ${u.emailVerified ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"}`}>
-                  {u.emailVerified ? "Verified" : "Unverified"}
-                </span>
-                <span className={`text-[11px] px-2 py-0.5 rounded-full border ${u.active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}>
-                  {u.active ? "Active" : "Inactive"}
-                </span>
-                <div className="flex gap-1">
-                  {u.active ? (
-                    <button onClick={async () => { await api.admin.deactivateUser(u.id); loadData(); loadStats(); }}
-                      className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition" title="Deactivate">
-                      <UserX size={14} />
-                    </button>
-                  ) : (
-                    <button onClick={async () => { await api.admin.reactivateUser(u.id); loadData(); loadStats(); }}
-                      className="p-1.5 text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition" title="Reactivate">
-                      <UserCheck size={14} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+
+      <form onSubmit={handleSearch} className="glass-panel rounded-2xl p-4 flex items-center gap-3">
+        <Search size={17} className="text-gray-muted shrink-0" />
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email..." className="flex-1 bg-transparent text-[13px] text-white placeholder:text-dark-500 outline-none" />
+        <button type="submit" className="px-4 py-1.5 rounded-xl bg-gold-500 text-dark-950 text-[12px] font-semibold hover:bg-gold-400 transition">Search</button>
+      </form>
+
+      {loading && (
+        <div className="space-y-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="glass-panel rounded-2xl p-5 animate-pulse">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-dark-700" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-dark-700 rounded w-1/4" />
+                  <div className="h-3 bg-dark-700 rounded w-1/3" />
+                </div>
+                <div className="h-6 w-16 bg-dark-700 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && users.length === 0 && (
+        <div className="glass-panel rounded-2xl p-12 text-center">
+          <Users size={28} className="text-dark-600 mx-auto mb-3" />
+          <p className="text-[13px] text-gray-muted">No users found</p>
+        </div>
+      )}
+
+      {!loading && users.length > 0 && (
+        <div className="space-y-2">
+          {users.map((user) => (
+            <div key={user.id} className="glass-panel rounded-2xl p-4 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-[11px] shrink-0">
+                {user.fullName?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-[13px] font-semibold truncate">{user.fullName}</p>
+                  {!user.active && <span className="text-[10px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full">Inactive</span>}
+                </div>
+                <p className="text-[11px] text-gray-muted truncate">{user.email}</p>
+              </div>
+              <span className={"px-2.5 py-1 rounded-full text-[10px] font-semibold " + (ROLE_COLORS[user.role] || "bg-dark-700 text-gray-muted")}>
+                {user.role?.replace("_", " ")}
+              </span>
+              <div className="flex items-center gap-2">
+                {actionLoading === user.id ? (
+                  <Loader2 size={16} className="text-gold-500 animate-spin" />
+                ) : user.active ? (
+                  <button onClick={() => handleDeactivate(user.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition" title="Deactivate"><UserX size={16} /></button>
+                ) : (
+                  <button onClick={() => handleReactivate(user.id)} className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-400 transition" title="Reactivate"><UserCheck size={16} /></button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
