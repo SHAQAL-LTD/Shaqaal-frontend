@@ -24,7 +24,7 @@ export default function AdminPage() {
   const loadUsers = (q?: string) => {
     setLoading(true);
     api.admin
-      .listUsers({ search: q || undefined, page: 0, size: 50 })
+      .listUsers(q || undefined, undefined, 0, 50)
       .then((data: any) => setUsers(data.content || []))
       .catch(() => setUsers([]))
       .finally(() => setLoading(false));

@@ -41,7 +41,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard/audit", label: "Audit Trail", icon: ClipboardList, roles: ["compliance_officer", "admin", "broker"] },
   { href: "/dashboard/kyc", label: "KYC / Verification", icon: Scale, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
   { href: "/dashboard/payments", label: "Payments", icon: CreditCard, roles: ["supplier", "buyer", "broker", "financier", "facilitator", "admin"] },
-  { href: "/dashboard/admin", label: "Admin Panel", icon: Users, roles: ["admin"] },
+  { href: "/users", label: "Operations", icon: Users, roles: ["admin"] },
   { href: "/dashboard/settings", label: "Settings", icon: Settings, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"] },
 ];
 

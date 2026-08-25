@@ -130,6 +130,10 @@ export const api = {
     logout: () => { clearTokens(); },
     forgotPassword: (email: string) =>
       request<void>("/auth/forgot-password", { method: "POST", body: { email } }),
+    verifyEmail: (token: string) =>
+      request<any>("/auth/verify-email?token=" + token),
+    resendVerification: () =>
+      request<any>("/auth/resend-verification", { method: "POST" }),
     resetPassword: (token: string, newPassword: string) =>
       request<void>("/auth/reset-password", { method: "POST", body: { token, newPassword } }),
   },
@@ -267,5 +271,8 @@ export const api = {
     updateVerification: (userId: string, status: string, note?: string) =>
       request<void>("/admin/users/" + userId + "/verification", { method: "PATCH", body: { status, note: note || "" } }),
     stats: () => request<any>("/admin/stats"),
+    auditTrail: (page = 0, size = 50) => request<any[]>("/admin/audit?page=" + page + "&size=" + size),
+    systemHealth: () => request<any>("/admin/health"),
+    getUserActivity: (userId: string) => request<any>("/admin/users/" + userId + "/activity"),
   },
 };
