@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { KycSubmission, CountryProfile } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
+import { EmptyState } from "@/components/ui-kit";
 import { Upload, FileCheck, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, X, File, Trash2, Shield } from "lucide-react";
 
 const STATUS_CONFIG: Record<string, { color: string; bg: string; border: string; label: string; icon: React.ElementType }> = {
@@ -96,7 +97,7 @@ export default function KycPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-muted mb-2">Upload files</label>
+            <label className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Upload files</label>
             <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-dark-700 rounded-xl cursor-pointer hover:border-gold-500/30 hover:bg-gold-500/[0.02] transition">
               <Upload size={24} className="text-dark-600 mb-2" />
               <p className="text-sm text-gray-muted">Click to select files</p>
@@ -114,7 +115,7 @@ export default function KycPage() {
                     <p className="text-sm font-medium truncate">{file.name}</p>
                     <p className="text-[11px] text-gray-muted">{(file.size / 1024).toFixed(1)} KB</p>
                   </div>
-                  <select value={docTypes[i] || ""} onChange={(e) => { const nd = [...docTypes]; nd[i] = e.target.value; setDocTypes(nd); }} className="bg-dark-900 border border-dark-700 rounded-lg px-3 py-1.5 text-xs text-white focus:border-gold-500 outline-none">
+                  <select value={docTypes[i] || ""} onChange={(e) => { const nd = [...docTypes]; nd[i] = e.target.value; setDocTypes(nd); }} className="select-chevron bg-dark-900 border border-dark-700 rounded-lg px-3 py-1.5 text-xs text-white focus:border-gold-500 outline-none">
                     <option value="">Select type</option>
                     <option value="CAC_CERTIFICATE">CAC Certificate</option>
                     <option value="TAX_ID">Tax ID / TIN</option>
@@ -139,11 +140,14 @@ export default function KycPage() {
       {loading && <div className="flex items-center justify-center py-16"><Loader2 size={28} className="text-gold-500 animate-spin" /></div>}
 
       {!loading && submissions.length === 0 && (
-        <div className="glass-panel-elevated rounded-2xl p-12 text-center">
-          <Shield size={40} className="text-muted-foreground/60 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No submissions yet</h3>
-          <p className="text-gray-muted text-sm">Submit your KYC documents to get verified on the platform.</p>
-        </div>
+        <EmptyState
+          icon={Shield}
+          title="No submissions"
+          description="Submit identity documents to begin verification — every submission is written to the audit ledger."
+          actionLabel="Submit documents"
+          onAction={() => setShowSubmit(true)}
+          actionIcon={<Upload size={16} />}
+        />
       )}
 
       {!loading && submissions.length > 0 && (

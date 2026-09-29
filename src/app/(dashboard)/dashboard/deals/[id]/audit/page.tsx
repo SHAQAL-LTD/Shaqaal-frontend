@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { AuditEvent, Deal } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
+import { EmptyState } from "@/components/ui-kit";
 import {
   ArrowLeft,
   ClipboardList,
@@ -158,11 +159,11 @@ export default function DealAuditPage() {
 
       {/* Empty State */}
       {!loading && events.length === 0 && !error && (
-        <div className="glass-panel-elevated rounded-2xl p-12 text-center">
-          <ClipboardList size={40} className="text-dark-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No audit events</h3>
-          <p className="text-gray-muted text-sm">This deal has no recorded audit events yet.</p>
-        </div>
+        <EmptyState
+          icon={ClipboardList}
+          title="No audit events"
+          description="Activity is recorded here as the deal advances through its stages."
+        />
       )}
 
       {/* Timeline */}

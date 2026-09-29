@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { EmptyState } from "@/components/ui-kit";
 import { Users, ArrowLeft, Search, UserCheck, UserX, Loader2 } from "lucide-react";
 
 const ROLE_COLORS: Record<string, string> = {
@@ -89,10 +90,11 @@ export default function AdminPage() {
       )}
 
       {!loading && users.length === 0 && (
-        <div className="glass-panel rounded-2xl p-12 text-center">
-          <Users size={28} className="text-dark-600 mx-auto mb-3" />
-          <p className="text-[13px] text-gray-muted">No users found</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="No users found"
+          description="User accounts will appear here once they register."
+        />
       )}
 
       {!loading && users.length > 0 && (

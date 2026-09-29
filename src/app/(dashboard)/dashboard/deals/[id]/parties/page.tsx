@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { selectClass, EmptyState } from "@/components/ui-kit";
 import type { DealParty, Organization, PageResponse } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -177,7 +178,7 @@ export default function DealPartiesPage() {
             <select
               value={selectedOrgId}
               onChange={(e) => setSelectedOrgId(e.target.value)}
-              className="w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition"
+              className={selectClass}
             >
               <option value="">Select organization</option>
               {availableOrgs.map((org) => (
@@ -238,21 +239,14 @@ export default function DealPartiesPage() {
 
       {/* Empty State */}
       {!loading && parties.length === 0 && (
-        <div className="glass-panel-elevated rounded-2xl p-12 text-center">
-          <Users size={48} className="text-dark-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No parties yet</h3>
-          <p className="text-gray-muted text-sm mb-6">
-            Add organizations as parties to this deal (seller, buyer, broker, logistics).
-          </p>
-          {canManage && (
-            <button
-              onClick={() => setShowAdd(true)}
-              className="button-gold px-6 py-3 rounded-lg inline-flex items-center gap-2 text-sm font-medium"
-            >
-              <UserPlus size={16} /> Add First Party
-            </button>
-          )}
-        </div>
+        <EmptyState
+          icon={Users}
+          title="No parties linked"
+          description="Add organizations as parties to this deal (seller, buyer, broker, logistics)."
+          actionLabel={canManage ? "Add First Party" : undefined}
+          onAction={() => setShowAdd(true)}
+          actionIcon={<UserPlus size={16} />}
+        />
       )}
 
       {/* Parties List */}

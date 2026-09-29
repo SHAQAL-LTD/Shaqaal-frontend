@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { EmptyState } from "@/components/ui-kit";
 import {
   CreditCard,
   ArrowLeft,
@@ -106,21 +107,14 @@ export default function PaymentsPage() {
       )}
 
       {!loading && payments.length === 0 && (
-        <div className="glass-panel rounded-2xl p-12 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gold-500/10 flex items-center justify-center mx-auto mb-4">
-            <Wallet size={28} className="text-gold-500" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No payments yet</h3>
-          <p className="text-[13px] text-gray-muted max-w-md mx-auto">
-            Payments will appear here once you initiate a transaction for a deal.
-          </p>
-          <Link
-            href="/dashboard/deals"
-            className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-xl bg-gold-500 text-dark-950 font-semibold text-[13px] hover:bg-gold-400 transition"
-          >
-            <Banknote size={15} /> View Deals
-          </Link>
-        </div>
+        <EmptyState
+          icon={Wallet}
+          title="No payments"
+          description="Payments will appear here once you initiate a transaction for a deal."
+          actionLabel="View deals"
+          actionHref="/dashboard/deals"
+          actionIcon={<Banknote size={16} />}
+        />
       )}
 
       {!loading && payments.length > 0 && (

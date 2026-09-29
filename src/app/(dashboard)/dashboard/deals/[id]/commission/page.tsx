@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { selectClass, EmptyState } from "@/components/ui-kit";
 import type { CommissionTree, CommissionNode, Organization, PageResponse } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -246,23 +247,15 @@ export default function CommissionPage() {
 
       {/* No Tree Yet */}
       {!loading && !tree && (
-        <div className="glass-panel-elevated rounded-2xl p-12 text-center">
-          <Scale size={48} className="text-dark-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No commission tree</h3>
-          <p className="text-gray-muted text-sm mb-6">
-            Create a commission tree to define how fees are allocated between parties.
-          </p>
-          {canManage && (
-            <button
-              onClick={handleCreateTree}
-              disabled={creating}
-              className="button-gold px-6 py-3 rounded-lg inline-flex items-center gap-2 text-sm font-medium disabled:opacity-50"
-            >
-              {creating ? <Loader2 size={16} className="animate-spin" /> : <Scale size={16} />}
-              Create Commission Tree
-            </button>
-          )}
-        </div>
+        <EmptyState
+          icon={Scale}
+          title="No commission tree"
+          description="Create a commission tree to define how fees are allocated between parties."
+          actionLabel={canManage ? "Create Commission Tree" : undefined}
+          onAction={handleCreateTree}
+          actionDisabled={creating}
+          actionIcon={creating ? <Loader2 size={16} className="animate-spin" /> : <Scale size={16} />}
+        />
       )}
 
       {/* Add Node Form */}
@@ -292,7 +285,7 @@ export default function CommissionPage() {
               <select
                 value={selectedOrgId}
                 onChange={(e) => setSelectedOrgId(e.target.value)}
-                className="w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition"
+                className={selectClass}
               >
                 <option value="">Select organization</option>
                 {availableOrgs.map((org) => (
@@ -310,7 +303,7 @@ export default function CommissionPage() {
               <select
                 value={parentNodeId}
                 onChange={(e) => setParentNodeId(e.target.value)}
-                className="w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition"
+                className={selectClass}
               >
                 <option value="">Root level (no parent)</option>
                 {nodes.map((n) => (

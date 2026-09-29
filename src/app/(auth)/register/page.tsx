@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthShell } from "@/components/app-shell";
-import { GoldButton, inputClass } from "@/components/ui-kit";
-import { ArrowRight, ArrowLeft, AlertCircle, Check, Eye, EyeOff } from "lucide-react";
+import { Field, GoldButton, inputClass, selectClass } from "@/components/ui-kit";
+import { ArrowRight, ArrowLeft, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 const ROLES = [
   { value: "supplier", label: "Supplier", desc: "I supply commodities" },
@@ -48,6 +48,14 @@ export default function RegisterPage() {
     finally { setLoading(false); }
   }
 
+  function goStep1() {
+    if (!fullName.trim() || !email.trim()) { setError("Name and email are required"); return; }
+    if (!role) { setError("Please select your role"); return; }
+    if (!country) { setError("Please select a country"); return; }
+    setError("");
+    setStep(1);
+  }
+
   return (
     <AuthShell
       eyebrow="Apply for access"
@@ -66,51 +74,155 @@ export default function RegisterPage() {
       }
     >
       <div className="mt-6">
-        <div className="flex gap-2 mb-6">{[0, 1, 2].map((i) => (<div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-gold" : "bg-secondary"}`} />))}</div>
-        {error && (<div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-xl p-3 mb-6"><AlertCircle size={16} className="text-danger shrink-0" /><p className="text-danger text-sm">{error}</p></div>)}
+        {/* 2-step progress */}
+        <div className="flex gap-2 mb-6">
+          {[0, 1].map((i) => (
+            <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-gold" : "bg-secondary"}`} />
+          ))}
+        </div>
 
-        {step === 0 && (<div className="grid gap-6">
-          <div><p className="text-sm font-medium text-muted-foreground mb-3">I am a...</p>
-            <div className="grid grid-cols-1 gap-2">{ROLES.map((r) => (<button key={r.value} type="button" onClick={() => setRole(r.value)} className={`flex items-center gap-3 p-3 rounded-xl border text-left transition ${role === r.value ? "border-gold bg-gold/10 text-foreground" : "border-border bg-secondary/40 text-muted-foreground hover:border-gold/40"}`}>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${role === r.value ? "border-gold bg-gold" : "border-border"}`}>{role === r.value && <Check size={12} className="text-primary-foreground" />}</div>
-              <div><p className="font-medium text-sm">{r.label}</p><p className="text-xs opacity-70">{r.desc}</p></div>
-            </button>))}</div></div>
-          <div><label className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Country</label><select value={country} onChange={(e) => setCountry(e.target.value)} className={inputClass}><option value="">Select country</option>{COUNTRIES.map((c) => (<option key={`${c.code}-${c.name}`} value={c.code}>{c.name}</option>))}</select></div>
-          <button onClick={() => { if (!role) { setError("Please select a role"); return; } if (!country) { setError("Please select a country"); return; } setError(""); setStep(1); }} className="button-gold w-full rounded-xl py-3 flex items-center justify-center gap-2 text-[15px]">Continue <ArrowRight size={16} strokeWidth={2.5} /></button>
-        </div>)}
+        {error && (
+          <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-xl p-3 mb-6">
+            <AlertCircle size={16} className="text-danger shrink-0" />
+            <p className="text-danger text-sm">{error}</p>
+          </div>
+        )}
 
-        {step === 1 && (<div className="grid gap-5">
-          <div><h2 className="text-2xl font-bold mb-1">Your details</h2><p className="text-muted-foreground text-sm">Tell us about yourself.</p></div>
-          <div><label className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Full name</label><input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="John Doe" className={inputClass} /></div>
-          <div><label className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Email address</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className={inputClass} /></div>
-          <div><label className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Phone number</label><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+234 800 000 0000" className={inputClass} /></div>
-          <div className="flex gap-3"><button onClick={() => setStep(0)} className="flex-1 border border-border rounded-xl py-3 flex items-center justify-center gap-2 text-[15px] hover:bg-secondary/60 transition"><ArrowLeft size={16} /> Back</button>
-            <button onClick={() => { if (!fullName || !email) { setError("Name and email are required"); return; } setError(""); setStep(2); }} className="flex-1 button-gold rounded-xl py-3 flex items-center justify-center gap-2 text-[15px]">Continue <ArrowRight size={16} strokeWidth={2.5} /></button></div>
-        </div>)}
+        {/* Step 1 — Your details (incl. role & country) */}
+        {step === 0 && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Field label="Full name">
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Ammar B. Haruna"
+                  autoComplete="name"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label="Work email">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  autoComplete="email"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label="Phone number">
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+234 800 000 0000"
+                  autoComplete="tel"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+            <Field label="I am a" hint={ROLES.find((r) => r.value === role)?.desc}>
+              <select value={role} onChange={(e) => setRole(e.target.value)} className={selectClass}>
+                <option value="">Select role</option>
+                {ROLES.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Country">
+              <select value={country} onChange={(e) => setCountry(e.target.value)} className={selectClass}>
+                <option value="">Select country</option>
+                {COUNTRIES.map((c) => (
+                  <option key={`${c.code}-${c.name}`} value={c.code}>{c.name}</option>
+                ))}
+              </select>
+            </Field>
 
-        {step === 2 && (<div className="grid gap-5">
-          <div><h2 className="text-2xl font-bold mb-1">Set your password</h2><p className="text-muted-foreground text-sm">Choose a strong password to secure your account.</p></div>
-          <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Password</label>
-            <div className="relative">
-              <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" className={`${inputClass} pr-12`} />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition" tabIndex={-1}>
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            <div className="sm:col-span-2 mt-2">
+              <GoldButton type="button" onClick={goStep1} className="w-full py-3 text-base">
+                Continue <ArrowRight className="h-4 w-4" />
+              </GoldButton>
             </div>
           </div>
-          <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1.5">Confirm password</label>
-            <div className="relative">
-              <input type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className={`${inputClass} pr-12`} />
-              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition" tabIndex={-1}>
-                {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+        )}
+
+        {/* Step 2 — Password */}
+        {step === 1 && (
+          <div className="grid gap-4">
+            <Field label="Password" hint="Min. 8 characters">
+              <span className="relative block">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••"
+                  autoComplete="new-password"
+                  className={`${inputClass} pr-12`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </span>
+            </Field>
+            <Field label="Confirm password">
+              <span className="relative block">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter password"
+                  autoComplete="new-password"
+                  className={`${inputClass} pr-12`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+                  tabIndex={-1}
+                  aria-label={showConfirm ? "Hide password" : "Show password"}
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </span>
+            </Field>
+
+            <div className="flex gap-3 mt-2">
+              <button
+                type="button"
+                onClick={() => { setStep(0); setError(""); }}
+                className="flex-1 border border-border rounded-xl py-3 flex items-center justify-center gap-2 text-[15px] hover:bg-secondary/60 transition"
+              >
+                <ArrowLeft size={16} /> Back
               </button>
+              <GoldButton
+                type="button"
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex-1 py-3 text-[15px]"
+              >
+                {loading ? (
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/70 border-t-transparent" />
+                ) : (
+                  <>
+                    Create account <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </GoldButton>
             </div>
           </div>
-          <div className="flex gap-3"><button onClick={() => setStep(1)} className="flex-1 border border-border rounded-xl py-3 flex items-center justify-center gap-2 text-[15px] hover:bg-secondary/60 transition"><ArrowLeft size={16} /> Back</button>
-            <button onClick={handleSubmit} disabled={loading} className="flex-1 button-gold rounded-xl py-3 flex items-center justify-center gap-2 text-[15px] disabled:opacity-50">{loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/70 border-t-transparent" /> : <>Create account <ArrowRight size={16} strokeWidth={2.5} /></>}</button></div>
-        </div>)}
+        )}
       </div>
     </AuthShell>
   );

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { ComplianceReview, ComplianceReviewDetail } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
+import { EmptyState } from "@/components/ui-kit";
 import { ShieldCheck, Loader2, AlertCircle, CheckCircle2, XCircle, Clock, MessageSquare, Eye, X, ArrowLeft } from "lucide-react";
 
 export default function CompliancePage() {
@@ -165,11 +166,11 @@ export default function CompliancePage() {
           {loading && <div className="flex items-center justify-center py-16"><Loader2 size={28} className="text-gold animate-spin" /></div>}
 
           {!loading && reviews.length === 0 && (
-            <div className="glass rounded-2xl p-12 text-center">
-              <ShieldCheck size={40} className="text-muted-foreground/60 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Queue empty</h3>
-              <p className="text-gray-muted text-sm">No {statusFilter} submissions to review right now.</p>
-            </div>
+            <EmptyState
+              icon={ShieldCheck}
+              title="Queue empty"
+              description={`No ${statusFilter} submissions to review right now.`}
+            />
           )}
 
           {!loading && reviews.length > 0 && (

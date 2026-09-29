@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { selectClass } from "@/components/ui-kit";
 import type { Document, Deal } from "@/lib/types";
 import {
   ArrowLeft,
@@ -150,7 +151,7 @@ export default function DealDocumentsPage() {
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
-              className="w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-white focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition"
+              className={selectClass}
             >
               {DOC_TYPES.map((dt) => (
                 <option key={dt.value} value={dt.value}>
@@ -213,8 +214,8 @@ export default function DealDocumentsPage() {
           Uploaded Documents ({documents.length})
         </h2>
         {documents.length === 0 ? (
-          <p className="text-gray-muted text-sm text-center py-8">
-            No documents uploaded yet.
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            No documents uploaded.
           </p>
         ) : (
           <div className="space-y-2">

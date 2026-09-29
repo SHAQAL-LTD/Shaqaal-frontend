@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { Deal, PageResponse } from "@/lib/types";
-import { Badge, Card, GoldButton, SectionTitle, inputClass } from "@/components/ui-kit";
+import { Badge, Card, EmptyState, GoldButton, SectionTitle, inputClass } from "@/components/ui-kit";
 import {
   Plus,
   ChevronLeft,
@@ -91,14 +91,14 @@ export default function DealsListPage() {
 
       {/* Empty State */}
       {!loading && !error && deals.length === 0 && (
-        <Card className="p-12 text-center">
-          <Package size={48} className="text-muted-foreground/50 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No deals yet</h3>
-          <p className="text-muted-foreground text-sm mb-6">Create your first deal to get started with the pipeline.</p>
-          <Link href="/dashboard/deals/new" className="button-gold px-6 py-3 rounded-xl inline-flex items-center gap-2 text-sm font-medium">
-            <Plus size={16} /> Create Deal
-          </Link>
-        </Card>
+        <EmptyState
+          icon={Package}
+          title="No deals in pipeline"
+          description="Create a deal room to start tracking stages, parties and documents."
+          actionLabel="New deal"
+          actionHref="/dashboard/deals/new"
+          actionIcon={<Plus size={16} />}
+        />
       )}
 
       {/* Deals */}

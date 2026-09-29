@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { api } from "@/lib/api";
 import type { AuditEvent, Deal } from "@/lib/types";
+import { EmptyState } from "@/components/ui-kit";
 import { ClipboardList, Search, Loader2, AlertCircle, Download, Clock, User, ArrowRight, FileText } from "lucide-react";
 
 const ACTION_COLORS: Record<string, string> = {
@@ -107,11 +108,11 @@ export default function AuditPage() {
 
       {/* Timeline */}
       {!loading && searched && events.length === 0 && !error && (
-        <div className="glass-panel-elevated rounded-2xl p-12 text-center">
-          <ClipboardList size={40} className="text-dark-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No audit events</h3>
-          <p className="text-gray-muted text-sm">This deal has no recorded audit events yet.</p>
-        </div>
+        <EmptyState
+          icon={ClipboardList}
+          title="No audit events"
+          description="This deal has no recorded activity. Events appear as it advances through its stages."
+        />
       )}
 
       {!loading && events.length > 0 && (

@@ -123,7 +123,7 @@ export default function SettingsPage() {
                   </div>
                   <h4 className="text-lg font-bold mb-1">Check your email</h4>
                   <p className="text-sm text-gray-muted mb-4">
-                    We sent a password reset link to <span className="text-white font-medium">{user?.email}</span>.
+                    Password reset link sent to <span className="text-white font-medium">{user?.email}</span>.
                     Click the link in the email to set a new password.
                   </p>
                   <button

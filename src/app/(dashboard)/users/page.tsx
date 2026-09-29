@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { api } from "@/lib/api";
+import { EmptyState } from "@/components/ui-kit";
 import {
   Users, Activity, Shield, Server, Search,
   UserCheck, UserX, TrendingUp, Database, FileText,
@@ -149,7 +150,7 @@ export default function UsersPage() {
                   <p className="text-[10px] text-gray-muted mt-1">{STAGE_LABELS[s.stage] || s.stage?.replace("STAGE_", "S")}</p>
                 </div>
               ))}
-              {(!stats.dealsByStage || stats.dealsByStage.length === 0) && <p className="text-[12px] text-gray-muted col-span-5 text-center py-4">No deals yet</p>}
+              {(!stats.dealsByStage || stats.dealsByStage.length === 0) && <p className="text-[12px] text-gray-muted col-span-5 text-center py-4">No deals</p>}
             </div>
           </div>
 
@@ -202,7 +203,13 @@ export default function UsersPage() {
 
       {!loading && tab === "audit" && (
         <div className="space-y-2">
-          {audit.length === 0 && <div className="glass-panel rounded-2xl p-12 text-center"><Activity size={28} className="text-dark-600 mx-auto mb-3" /><p className="text-[13px] text-gray-muted">No audit events yet</p></div>}
+          {audit.length === 0 && (
+            <EmptyState
+              icon={Activity}
+              title="No audit events"
+              description="Platform activity will appear here as it happens."
+            />
+          )}
           {audit.map((event: any) => (
             <div key={event.id} className="glass-panel rounded-xl p-4 flex items-start gap-4">
               <div className="w-8 h-8 rounded-lg bg-dark-700 flex items-center justify-center shrink-0 mt-0.5"><Activity size={14} className="text-gold-500" /></div>

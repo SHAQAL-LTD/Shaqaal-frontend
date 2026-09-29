@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { inputClass, selectClass } from "@/components/ui-kit";
 import { ArrowLeft, ArrowRight, AlertCircle, Check, Loader2 } from "lucide-react";
 
 const MINERALS = [
@@ -40,7 +41,7 @@ export default function NewDealPage() {
   const [afcftaEligible, setAfcftaEligible] = useState(false);
   const [manualPriceUsd, setManualPriceUsd] = useState("");
 
-  const ic = "w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition";
+  const ic = inputClass;
 
   async function handleSubmit() {
     setError("");
@@ -95,7 +96,7 @@ export default function NewDealPage() {
             <div><h3 className="text-xl font-bold mb-1">Commodity details</h3><p className="text-gray-muted text-sm">What are you trading?</p></div>
             <div>
               <label className="block text-sm font-medium text-gray-muted mb-1.5">Mineral type</label>
-              <select value={mineralType} onChange={(e) => setMineralType(e.target.value)} className={ic}>
+              <select value={mineralType} onChange={(e) => setMineralType(e.target.value)} className={selectClass}>
                 <option value="">Select mineral</option>
                 {MINERALS.map((m) => (<option key={m.value} value={m.value}>{m.label}</option>))}
               </select>
@@ -120,14 +121,14 @@ export default function NewDealPage() {
             <div><h3 className="text-xl font-bold mb-1">Trade route</h3><p className="text-gray-muted text-sm">Where is it coming from and going to?</p></div>
             <div>
               <label className="block text-sm font-medium text-gray-muted mb-1.5">Origin country</label>
-              <select value={originCountry} onChange={(e) => setOriginCountry(e.target.value)} className={ic}>
+              <select value={originCountry} onChange={(e) => setOriginCountry(e.target.value)} className={selectClass}>
                 <option value="">Select origin</option>
                 {COUNTRIES.map((c) => (<option key={`o-${c.code}`} value={c.code}>{c.name}</option>))}
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-muted mb-1.5">Destination country</label>
-              <select value={destinationCountry} onChange={(e) => setDestinationCountry(e.target.value)} className={ic}>
+              <select value={destinationCountry} onChange={(e) => setDestinationCountry(e.target.value)} className={selectClass}>
                 <option value="">Select destination</option>
                 {COUNTRIES.map((c) => (<option key={`d-${c.code}`} value={c.code}>{c.name}</option>))}
               </select>

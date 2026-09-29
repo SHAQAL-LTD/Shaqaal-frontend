@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { inputClass, selectClass, EmptyState } from "@/components/ui-kit";
 import type { Organization, PageResponse } from "@/lib/types";
 import { Building2, Plus, AlertCircle, Loader2, ArrowRight, BadgeCheck, X } from "lucide-react";
 
@@ -22,7 +23,7 @@ export default function OrganizationsPage() {
   const [legalName, setLegalName] = useState("");
   const [country, setCountry] = useState("");
 
-  const ic = "w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition";
+  const ic = inputClass;
 
   useEffect(() => { loadOrgs(); }, []);
 
@@ -50,7 +51,7 @@ export default function OrganizationsPage() {
   return (
     <div className="p-4 md:p-8 lg:p-10 space-y-6 animate-fade-in-up">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <p className="max-w-xl text-sm text-muted-foreground">Manage your KYB-registered entities and counterparties.</p>
+        <p className="max-w-xl text-sm text-muted-foreground">Register an entity once and reuse it as a counterparty and KYC packet across every deal room.</p>
         <button onClick={() => setShowCreate(true)} className="button-gold shrink-0 px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium">
           <Plus size={16} /> New Organization
         </button>
@@ -61,12 +62,14 @@ export default function OrganizationsPage() {
       {loading && <div className="flex items-center justify-center py-16"><Loader2 size={32} className="text-gold-500 animate-spin" /></div>}
 
       {!loading && orgs.length === 0 && (
-        <div className="glass-panel rounded-2xl p-12 text-center">
-          <Building2 size={48} className="text-dark-600 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No organizations</h3>
-          <p className="text-gray-muted text-sm mb-6">Create an organization to start trading on the platform.</p>
-          <button onClick={() => setShowCreate(true)} className="button-gold px-6 py-3 rounded-lg inline-flex items-center gap-2 text-sm font-medium"><Plus size={16} /> Create Organization</button>
-        </div>
+        <EmptyState
+          icon={Building2}
+          title="No organizations"
+          description="Create an organization to start trading on the platform."
+          actionLabel="New Organization"
+          onAction={() => setShowCreate(true)}
+          actionIcon={<Plus size={16} />}
+        />
       )}
 
       {!loading && orgs.length > 0 && (
@@ -102,7 +105,7 @@ export default function OrganizationsPage() {
               <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Trading name *</label><input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ashanti Madalali Coop" className={ic} /></div>
               <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Legal name</label><input type="text" value={legalName} onChange={(e) => setLegalName(e.target.value)} placeholder="Optional registered name" className={ic} /></div>
               <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Country *</label>
-                <select value={country} onChange={(e) => setCountry(e.target.value)} className={ic}>
+                <select value={country} onChange={(e) => setCountry(e.target.value)} className={selectClass}>
                   <option value="">Select country</option>
                   {Object.entries(COUNTRIES).map(([code, label]) => (<option key={code} value={code}>{label}</option>))}
                 </select>

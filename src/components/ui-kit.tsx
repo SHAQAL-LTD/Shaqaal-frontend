@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
@@ -106,7 +107,7 @@ export function Field({
   children: ReactNode;
 }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
         {label}
       </span>
@@ -117,13 +118,97 @@ export function Field({
 }
 
 export const inputClass =
-  "w-full rounded-xl border border-input bg-background/60 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-gold/60 focus:ring-2 focus:ring-gold/20";
+  "w-full h-[42px] rounded-xl border border-input bg-background/60 px-3.5 py-2.5 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-gold/60 focus:ring-2 focus:ring-gold/20";
 
-export function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+/**
+ * Select variant of inputClass: identical height/vertical padding (the shared
+ * h-[42px] + py-2.5 lock it), plus `select-chevron` — appearance:none and a
+ * centered 16px chevron with 36px reserved on the RIGHT only, so horizontal
+ * padding for the icon can never affect row alignment or control height.
+ */
+export const selectClass = `${inputClass} select-chevron`;
+
+/**
+ * Canonical empty state — one exact pattern for every page:
+ * icon (40px, muted) → bold headline → one descriptive line → optional single
+ * primary CTA. `inset` drops the glass panel chrome for use inside an existing
+ * Card so spacing/typography stay identical.
+ */
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  actionLabel,
+  actionHref,
+  onAction,
+  actionIcon,
+  actionDisabled,
+  inset = false,
+  className,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  actionLabel?: string;
+  actionHref?: string;
+  onAction?: () => void;
+  actionIcon?: ReactNode;
+  actionDisabled?: boolean;
+  inset?: boolean;
+  className?: string;
+}) {
+  const actionClass =
+    "button-gold mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50";
   return (
-    <Card className="p-4">
+    <div
+      className={cn(
+        "text-center",
+        inset ? "py-12" : "glass rounded-2xl p-12 shadow-2xl shadow-black/40",
+        className,
+      )}
+    >
+      <Icon size={40} className="mx-auto mb-4 text-muted-foreground/60" />
+      <h3 className="mb-2 text-xl font-semibold text-foreground">{title}</h3>
+      <p className="mx-auto max-w-md text-sm text-muted-foreground">{description}</p>
+      {actionLabel ? (
+        actionHref ? (
+          <Link href={actionHref} className={actionClass}>
+            {actionIcon}
+            {actionLabel}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={onAction}
+            disabled={actionDisabled}
+            className={actionClass}
+          >
+            {actionIcon}
+            {actionLabel}
+          </button>
+        )
+      ) : null}
+    </div>
+  );
+}
+
+export function Stat({
+  label,
+  value,
+  sub,
+  className,
+  valueClassName,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  className?: string;
+  valueClassName?: string;
+}) {
+  return (
+    <Card className={cn("p-4", className)}>
       <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="tnum mt-2 font-display text-2xl font-semibold text-foreground">{value}</p>
+      <p className={cn("tnum mt-2 font-display text-2xl font-semibold text-foreground", valueClassName)}>{value}</p>
       {sub ? <p className="mt-1 text-xs text-gold">{sub}</p> : null}
     </Card>
   );

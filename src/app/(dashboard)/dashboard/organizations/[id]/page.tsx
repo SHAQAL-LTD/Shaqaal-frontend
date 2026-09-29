@@ -77,7 +77,7 @@ export default function OrganizationDetailPage() {
               <h3 className="font-semibold">Members ({members.length})</h3>
             </div>
             {members.length === 0 ? (
-              <div className="p-8 text-center text-gray-muted text-sm">No members yet</div>
+              <div className="p-8 text-center text-sm text-muted-foreground">No members</div>
             ) : (
               <div className="divide-y divide-dark-800/50">
                 {members.map((m) => (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { api } from "@/lib/api";
 import { Brand } from "@/components/app-shell";
 import {
   LayoutDashboard,
@@ -91,6 +92,68 @@ function headerTitle(pathname: string): { title: string; subtitle?: string } {
 }
 
 // ─── Sidebar ────────────────────────────────────────────
+/** Formats an ISO/epoch timestamp as e.g. "29 Sept, 03:11". */
+function fmtAuditTs(raw: unknown): string | null {
+  if (raw == null) return null;
+  const d = new Date(typeof raw === "number" ? raw : String(raw));
+  if (Number.isNaN(d.getTime())) return null;
+  return `${d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}, ${d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+/**
+ * Data-driven compliance status. Active rooms are counted from the deals API;
+ * the global last-audit timestamp is only exposed via GET /admin/audit today
+ * (ADMIN-only) — other roles show "—" until a non-admin summary endpoint lands
+ * (see docs/backend-changes-for-ui.md).
+ */
+function ComplianceStatusBox() {
+  const { user } = useAuth();
+  const [activeRooms, setActiveRooms] = useState<number | null>(null);
+  const [lastAuditAt, setLastAuditAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const page = await api.deals.list(0, 100);
+        if (alive) setActiveRooms(page.content.filter((d) => !d.completed).length);
+      } catch {
+        /* keep — */
+      }
+      if (user?.role === "admin") {
+        try {
+          const events: Array<Record<string, unknown>> = await api.admin.auditTrail(0, 1);
+          const ts = fmtAuditTs(events?.[0]?.occurred_at);
+          if (alive && ts) setLastAuditAt(ts);
+        } catch {
+          /* keep — */
+        }
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [user?.role]);
+
+  return (
+    <div className="mt-10 shrink-0 rounded-2xl border border-gold/20 bg-gold/5 p-4">
+      <p className="text-xs uppercase tracking-wider text-gold">Compliance status</p>
+      <dl className="mt-2.5 space-y-2 text-sm">
+        <div className="flex items-center justify-between gap-3">
+          <dt className="text-muted-foreground">Active rooms</dt>
+          <dd className="tnum font-medium text-foreground">
+            {activeRooms === null ? "…" : activeRooms}
+          </dd>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <dt className="text-muted-foreground">Last audit</dt>
+          <dd className="tnum text-xs font-medium text-foreground">{lastAuditAt ?? "—"}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
 function SidebarContent({ onNavClick, hideBrand }: { onNavClick?: () => void; hideBrand?: boolean }) {
   const pathname = usePathname();
   const { user } = useAuth();
@@ -120,12 +183,7 @@ function SidebarContent({ onNavClick, hideBrand }: { onNavClick?: () => void; hi
         })}
       </nav>
 
-      <div className="mt-10 shrink-0 rounded-2xl border border-gold/20 bg-gold/5 p-4">
-        <p className="text-xs uppercase tracking-wider text-gold">Compliance status</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          All active rooms are audit-locked and hash-chained.
-        </p>
-      </div>
+      <ComplianceStatusBox />
     </>
   );
 }
@@ -243,7 +301,7 @@ function NotificationBell() {
           </div>
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 && (
-              <div className="px-5 py-8 text-center text-[12px] text-muted-foreground">No notifications yet</div>
+              <div className="px-5 py-8 text-center text-[12px] text-muted-foreground">No notifications</div>
             )}
             {notifications.map((n) => (
               <div key={n.id} className="px-5 py-3.5 hover:bg-secondary/40 transition cursor-pointer border-b border-border/60 last:border-0 group">
@@ -287,7 +345,7 @@ function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {
           <Menu className="h-4 w-4" />
         </button>
         <div className="min-w-0">
-          <h1 className="truncate text-lg font-semibold sm:text-xl">{title}</h1>
+          {title ? <h1 className="truncate text-lg font-semibold sm:text-xl">{title}</h1> : null}
           {subtitle ? (
             <p className="truncate text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
           ) : null}

@@ -107,6 +107,8 @@
 :root {
   --radius: 0.75rem;
   --gold: oklch(0.78 0.13 88);
+  --gold-bright: oklch(0.91 0.08 92);
+  --gold-deep: oklch(0.62 0.12 82);
   --background: oklch(0.16 0 0);
   --foreground: oklch(0.98 0 0);
   --card: oklch(0.21 0.003 60);
@@ -143,6 +145,9 @@
 
 /* Dark-only app: <html> carries the `dark` class; keep the DESIGN palette. */
 .dark {
+  --gold: oklch(0.78 0.13 88);
+  --gold-bright: oklch(0.91 0.08 92);
+  --gold-deep: oklch(0.62 0.12 82);
   --background: oklch(0.16 0 0);
   --foreground: oklch(0.98 0 0);
   --card: oklch(0.21 0.003 60);
@@ -359,6 +364,17 @@
   .stagger-in > *:nth-child(6) { animation-delay: 0.3s; }
   .stagger-in > *:nth-child(7) { animation-delay: 0.35s; }
   .stagger-in > *:nth-child(8) { animation-delay: 0.4s; }
+
+  /* ─── Selects (aligned chevron) ────────────────── */
+  .select-chevron {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 16px;
+    padding-right: 2.25rem;
+  }
 
   /* ─── Input Focus Ring ──────────────────────────── */
   .input-gold {
