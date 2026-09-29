@@ -7,10 +7,10 @@ import { ClipboardList, Search, Loader2, AlertCircle, Download, Clock, User, Arr
 
 const ACTION_COLORS: Record<string, string> = {
   STAGE_ADVANCED: "bg-gold-500/10 text-gold-500 border-gold-500/20",
-  DEAL_CREATED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  DOCUMENT_UPLOADED: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  PARTY_ADDED: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-  COMMISSION_LOCKED: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  DEAL_CREATED: "bg-success/10 text-success border-success/40",
+  DOCUMENT_UPLOADED: "bg-chart-2/10 text-chart-2 border-chart-2/40",
+  PARTY_ADDED: "bg-chart-1/10 text-chart-1 border-chart-1/40",
+  COMMISSION_LOCKED: "bg-gold/10 text-gold-bright border-gold/40",
 };
 
 function formatAction(action: string): string {
@@ -56,10 +56,7 @@ export default function AuditPage() {
 
   return (
     <div className="p-4 md:p-8 lg:p-10 space-y-8 animate-fade-in-up">
-      <div>
-        <h1 className="text-4xl font-bold tracking-tight">Audit Trail</h1>
-        <p className="text-gray-muted mt-2 text-[15px]">Search a deal to view its full lifecycle history.</p>
-      </div>
+      <p className="max-w-2xl text-sm text-muted-foreground">Search a deal to view its full lifecycle history — every transition is hash-chained and exportable.</p>
 
       {/* Search */}
       <div className="glass-panel-elevated rounded-2xl p-6">
@@ -89,7 +86,7 @@ export default function AuditPage() {
         </div>
       </div>
 
-      {error && <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4"><AlertCircle size={18} className="text-red-400 shrink-0" /><p className="text-red-400 text-sm">{error}</p></div>}
+      {error && <div className="flex items-center gap-3 bg-danger/10 border border-danger/40 rounded-xl p-4"><AlertCircle size={18} className="text-danger shrink-0" /><p className="text-danger text-sm">{error}</p></div>}
 
       {/* Deal Summary */}
       {deal && (

@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Brand } from "@/components/app-shell";
 import {
-  Diamond,
   LayoutDashboard,
   FileText,
   ShieldCheck,
@@ -20,7 +20,6 @@ import {
   Settings,
   ClipboardList,
   Scale,
-  ArrowRight,
   CreditCard,
   Users,
 } from "lucide-react";
@@ -34,12 +33,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"] },
+  { href: "/dashboard", label: "Deal Dashboard", icon: LayoutDashboard, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"] },
   { href: "/dashboard/deals", label: "Deals", icon: FileText, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
   { href: "/dashboard/organizations", label: "Organizations", icon: Building2, roles: ["supplier", "buyer", "broker", "financier", "facilitator", "admin"] },
   { href: "/dashboard/compliance", label: "Compliance", icon: ShieldCheck, roles: ["compliance_officer", "admin"] },
   { href: "/dashboard/audit", label: "Audit Trail", icon: ClipboardList, roles: ["compliance_officer", "admin", "broker"] },
-  { href: "/dashboard/kyc", label: "KYC / Verification", icon: Scale, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
+  { href: "/dashboard/kyc", label: "KYC Onboarding", icon: Scale, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
   { href: "/dashboard/payments", label: "Payments", icon: CreditCard, roles: ["supplier", "buyer", "broker", "financier", "facilitator", "admin"] },
   { href: "/users", label: "Operations", icon: Users, roles: ["admin"] },
   { href: "/dashboard/settings", label: "Settings", icon: Settings, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"] },
@@ -51,27 +50,56 @@ const ROLE_LABELS: Record<string, string> = {
   facilitator: "Facilitator", admin: "Administrator",
 };
 
+// ─── Header titles (DESIGN AppShell title/subtitle) ────
+const ROUTE_TITLES: Array<{ match: string; title: string; subtitle?: string }> = [
+  { match: "/dashboard/deals/new", title: "Create deal room", subtitle: "Stage 1 opens on submission." },
+  { match: "/dashboard/deals", title: "Deal Book", subtitle: "All mandates across your desk, stage by stage." },
+  { match: "/dashboard/organizations", title: "Organizations", subtitle: "KYB-registered entities and counterparties." },
+  { match: "/dashboard/compliance", title: "Compliance Desk", subtitle: "Broker registration & KYC approval queue" },
+  { match: "/dashboard/audit", title: "Audit Trail", subtitle: "Immutable, append-only activity history." },
+  { match: "/dashboard/kyc", title: "KYC Onboarding", subtitle: "Verification required before deal room access" },
+  { match: "/dashboard/payments", title: "Payments", subtitle: "Escrow funding, payouts and settlement." },
+  { match: "/dashboard/settings", title: "Settings", subtitle: "Platform preferences and security." },
+  { match: "/dashboard/admin", title: "Admin Console", subtitle: "Platform administration." },
+  { match: "/dashboard/profile", title: "Operator Profile", subtitle: "Your identity, permissions and audit trail." },
+  { match: "/users", title: "Operations", subtitle: "User administration and roles." },
+  { match: "/dashboard", title: "Deal Dashboard", subtitle: "All active mandates across your desk" },
+];
+
+function prettify(segment: string) {
+  return segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+}
+
+function headerTitle(pathname: string): { title: string; subtitle?: string } {
+  // Deal detail: /dashboard/deals/<id>[/sub]
+  const dealMatch = pathname.match(/^\/dashboard\/deals\/([^/]+)(?:\/([^/]+))?$/);
+  if (dealMatch) {
+    const id = decodeURIComponent(dealMatch[1]);
+    if (id !== "new") {
+      return {
+        title: `Deal ${id}`,
+        subtitle: dealMatch[2] ? prettify(dealMatch[2]) : "10-stage pipeline · audit-locked room",
+      };
+    }
+  }
+  const route = ROUTE_TITLES.find(
+    (r) => pathname === r.match || pathname.startsWith(r.match + "/"),
+  );
+  if (route) return { title: route.title, subtitle: route.subtitle };
+  const last = pathname.split("/").filter(Boolean).pop();
+  return { title: last ? prettify(last) : "Shaqal TradeOS" };
+}
+
 // ─── Sidebar ────────────────────────────────────────────
-function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
+function SidebarContent({ onNavClick, hideBrand }: { onNavClick?: () => void; hideBrand?: boolean }) {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const visibleNav = NAV_ITEMS.filter((item) => user?.role && item.roles.includes(user.role));
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-5 border-b border-white/[0.04]">
-        <Link href="/" onClick={onNavClick} className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center shadow-md shadow-gold-500/20">
-            <Diamond size={18} className="text-dark-950" strokeWidth={2} />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold tracking-tight text-gradient-gold">SHAQAL</h1>
-            <p className="text-[9px] text-gray-muted uppercase tracking-[0.25em] font-semibold">TradeOS</p>
-          </div>
-        </Link>
-      </div>
-
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+    <>
+      {hideBrand ? null : <Brand href="/" />}
+      <nav className="mt-8 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
         {visibleNav.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
           return (
@@ -79,42 +107,26 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
               key={item.href}
               href={item.href}
               onClick={onNavClick}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 ${
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
                 isActive
-                  ? "bg-gold-500/10 text-gold-500 border border-gold-500/15 shadow-sm shadow-gold-500/5"
-                  : "text-gray-muted hover:bg-white/[0.03] hover:text-white border border-transparent"
+                  ? "border border-gold/30 bg-sidebar-accent text-gold-bright"
+                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground"
               }`}
             >
-              <item.icon size={17} strokeWidth={1.5} />
-              {item.label}
+              <item.icon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-3 border-t border-white/[0.04]">
-        <Link
-          href="/dashboard/profile"
-          onClick={onNavClick}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl glass-panel hover:bg-white/[0.04] transition group"
-        >
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-[11px] shrink-0 shadow-sm shadow-gold-500/20">
-            {user?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold truncate group-hover:text-gold-500 transition">{user?.fullName || "User"}</p>
-            <p className="text-[11px] text-gray-muted truncate">{ROLE_LABELS[user?.role || ""] || user?.role}</p>
-          </div>
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); logout(); }}
-            className="text-gray-muted hover:text-red-400 transition shrink-0 p-1.5 rounded-lg hover:bg-red-500/10"
-            title="Sign out"
-          >
-            <LogOut size={14} />
-          </button>
-        </Link>
+      <div className="mt-10 shrink-0 rounded-2xl border border-gold/20 bg-gold/5 p-4">
+        <p className="text-xs uppercase tracking-wider text-gold">Compliance status</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          All active rooms are audit-locked and hash-chained.
+        </p>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -138,34 +150,32 @@ function UserDropdown() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-white/[0.04] transition-all border border-white/5"
+        aria-label="Open account menu"
+        className="flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 py-1 pl-1 pr-3 transition-colors hover:border-gold/60 hover:bg-gold/20"
       >
-        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-[11px] shrink-0">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-b from-gold-bright to-gold text-xs font-bold text-primary-foreground">
           {initials}
-        </div>
-        <div className="hidden sm:block text-left">
-          <p className="text-[13px] font-semibold leading-tight truncate max-w-[110px]">{user?.fullName}</p>
-          <p className="text-[10px] text-gray-muted">{ROLE_LABELS[user?.role || ""]}</p>
-        </div>
-        <ChevronDown size={13} className={`text-gray-muted transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        </span>
+        <span className="hidden text-xs text-foreground sm:block">{ROLE_LABELS[user?.role || ""] || "User"}</span>
+        <ChevronDown size={13} className={`text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-dark-900/95 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl shadow-black/60 py-2 z-50 animate-slide-down">
-          <div className="px-4 py-3 border-b border-white/5">
+        <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-border bg-popover/95 backdrop-blur-xl shadow-2xl shadow-black/60 py-2 z-50 animate-slide-down">
+          <div className="px-4 py-3 border-b border-border">
             <p className="text-[13px] font-semibold truncate">{user?.fullName}</p>
-            <p className="text-[11px] text-gray-muted truncate">{user?.email}</p>
+            <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
           </div>
           <div className="p-1.5">
-            <Link href="/dashboard/profile" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-gray-300 hover:bg-white/[0.04] hover:text-white transition rounded-xl">
+            <Link href="/dashboard/profile" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-muted-foreground hover:bg-secondary/60 hover:text-foreground transition rounded-xl">
               <User size={15} /> My Profile
             </Link>
-            <Link href="/dashboard/settings" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-gray-300 hover:bg-white/[0.04] hover:text-white transition rounded-xl">
+            <Link href="/dashboard/settings" onClick={() => setOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-muted-foreground hover:bg-secondary/60 hover:text-foreground transition rounded-xl">
               <Settings size={15} /> Settings
             </Link>
           </div>
-          <div className="p-1.5 border-t border-white/5">
-            <button onClick={() => { setOpen(false); logout(); }} className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-red-400 hover:bg-red-500/5 transition rounded-xl w-full">
+          <div className="p-1.5 border-t border-border">
+            <button onClick={() => { setOpen(false); logout(); }} className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-danger hover:bg-danger/10 transition rounded-xl w-full">
               <LogOut size={15} /> Sign Out
             </button>
           </div>
@@ -212,46 +222,47 @@ function NotificationBell() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className={`relative p-2.5 rounded-xl border border-white/5 transition-all ${open ? "bg-white/[0.06] text-white" : "hover:bg-white/[0.04] text-gray-muted hover:text-white"}`}
+        aria-label="Notifications"
+        className={`relative rounded-lg border border-border p-2 transition-all ${open ? "bg-secondary/60 text-foreground" : "text-muted-foreground hover:text-gold"}`}
       >
-        <Bell size={17} strokeWidth={1.5} />
+        <Bell size={16} strokeWidth={1.5} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold-500 rounded-full text-[9px] font-bold text-dark-950 flex items-center justify-center shadow-sm shadow-gold-500/30">
+          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full bg-gold px-1 text-[9px] font-bold text-primary-foreground flex items-center justify-center">
             {unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-dark-900/95 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden z-50 animate-slide-down">
-          <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+        <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border bg-popover/95 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden z-50 animate-slide-down">
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <p className="text-[13px] font-semibold">Notifications</p>
             {unreadCount > 0 && (
-              <span className="text-[10px] font-bold text-gold-500 bg-gold-500/10 px-2 py-0.5 rounded-full">{unreadCount} new</span>
+              <span className="text-[10px] font-bold text-gold bg-gold/10 px-2 py-0.5 rounded-full">{unreadCount} new</span>
             )}
           </div>
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 && (
-              <div className="px-5 py-8 text-center text-[12px] text-gray-muted">No notifications yet</div>
+              <div className="px-5 py-8 text-center text-[12px] text-muted-foreground">No notifications yet</div>
             )}
             {notifications.map((n) => (
-              <div key={n.id} className="px-5 py-3.5 hover:bg-white/[0.02] transition cursor-pointer border-b border-white/[0.02] last:border-0 group">
+              <div key={n.id} className="px-5 py-3.5 hover:bg-secondary/40 transition cursor-pointer border-b border-border/60 last:border-0 group">
                 <div className="flex items-start gap-3">
                   <span className="text-lg mt-0.5 shrink-0">🔔</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-[13px] font-medium leading-snug">{n.title}</p>
-                      {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-gold-500 shrink-0" />}
+                      {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />}
                     </div>
-                    <p className="text-[11px] text-gray-muted mt-0.5 leading-relaxed">{n.message}</p>
-                    <p className="text-[10px] text-dark-500 mt-1.5 font-medium">{n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ""}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{n.message}</p>
+                    <p className="text-[10px] text-muted-foreground/70 mt-1.5 font-medium">{n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ""}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          <div className="px-5 py-3 border-t border-white/5 text-center">
-            <button onClick={handleMarkAllRead} className="text-[11px] font-medium text-gold-500 hover:text-gold-400 transition">Mark all as read</button>
+          <div className="px-5 py-3 border-t border-border text-center">
+            <button onClick={handleMarkAllRead} className="text-[11px] font-medium text-gold hover:text-gold-bright transition">Mark all as read</button>
           </div>
         </div>
       )}
@@ -260,75 +271,70 @@ function NotificationBell() {
 }
 
 
-// ─── Top Navbar ─────────────────────────────────────────
+// ─── Top Navbar (DESIGN AppShell header) ────────────────
 function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {
   const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean);
-  const breadcrumbs = segments.map((s, i) => ({
-    label: s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, " "),
-    href: "/" + segments.slice(0, i + 1).join("/"),
-    isLast: i === segments.length - 1,
-  }));
+  const { title, subtitle } = headerTitle(pathname);
 
   return (
-    <header className="sticky top-0 z-40 bg-dark-950/70 backdrop-blur-xl border-b border-white/[0.04]">
-      <div className="flex items-center justify-between h-14 px-4 md:px-8">
-        <div className="flex items-center gap-4">
-          <button onClick={onMenuClick} className="md:hidden p-2 border border-white/5 rounded-xl text-gold-500 hover:bg-white/[0.04] transition">
-            <Menu size={18} />
-          </button>
-          <nav className="hidden sm:flex items-center gap-1.5 text-[13px]">
-            {breadcrumbs.map((b, i) => (
-              <React.Fragment key={b.href}>
-                {i > 0 && <span className="text-dark-600 mx-0.5">/</span>}
-                {b.isLast ? (
-                  <span className="text-white font-medium">{b.label}</span>
-                ) : (
-                  <Link href={b.href} className="text-gray-muted hover:text-white transition">{b.label}</Link>
-                )}
-              </React.Fragment>
-            ))}
-          </nav>
+    <header className="sticky top-0 z-30 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-border bg-background/70 px-4 py-4 backdrop-blur-xl sm:px-8">
+      <div className="flex min-w-0 items-center gap-3">
+        <button
+          onClick={onMenuClick}
+          aria-label="Open navigation"
+          className="shrink-0 rounded-lg border border-border p-2 text-muted-foreground lg:hidden"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
+        <div className="min-w-0">
+          <h1 className="truncate text-lg font-semibold sm:text-xl">{title}</h1>
+          {subtitle ? (
+            <p className="truncate text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
+          ) : null}
         </div>
-
-        <div className="flex items-center gap-2">
-          <NotificationBell />
-          <UserDropdown />
-        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-3">
+        <NotificationBell />
+        <UserDropdown />
       </div>
     </header>
   );
 }
 
-// ─── Layout ─────────────────────────────────────────────
+// ─── Layout (DESIGN AppShell grid) ──────────────────────
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <ProtectedRoute>
-      <div className="flex flex-col md:flex-row min-h-screen">
-        <aside className="hidden md:flex flex-col w-60 h-screen glass-panel sticky top-0 border-r border-white/[0.04] shrink-0">
+      <div className="min-h-screen w-full lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
+        <aside className="hidden border-r border-sidebar-border bg-sidebar/80 p-5 lg:block">
           <SidebarContent />
         </aside>
 
+        <div className="min-w-0">
+          <TopNavbar onMenuClick={() => setMobileOpen(true)} />
+          <main className="min-w-0">{children}</main>
+        </div>
+
         {mobileOpen && (
-          <div className="fixed inset-0 z-50 md:hidden">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-            <aside className="absolute left-0 top-0 h-full w-72 bg-dark-900 border-r border-white/[0.04] flex flex-col animate-slide-down">
-              <div className="flex items-center justify-end p-4">
-                <button onClick={() => setMobileOpen(false)} className="p-2 text-gray-muted hover:text-white transition rounded-xl hover:bg-white/[0.04]">
-                  <X size={18} />
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="absolute inset-0 bg-black/70" onClick={() => setMobileOpen(false)} />
+            <div className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-sidebar-border bg-sidebar p-5">
+              <div className="flex items-center justify-between">
+                <Brand href="/" />
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  aria-label="Close navigation"
+                  className="rounded-lg border border-border p-2 text-muted-foreground"
+                >
+                  <X className="h-4 w-4" />
                 </button>
               </div>
-              <SidebarContent onNavClick={() => setMobileOpen(false)} />
-            </aside>
+              <SidebarContent onNavClick={() => setMobileOpen(false)} hideBrand />
+            </div>
           </div>
         )}
-
-        <div className="flex-1 flex flex-col min-h-screen">
-          <TopNavbar onMenuClick={() => setMobileOpen(true)} />
-          <main className="flex-1 overflow-x-hidden overflow-y-auto">{children}</main>
-        </div>
       </div>
     </ProtectedRoute>
   );

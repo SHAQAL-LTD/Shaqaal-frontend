@@ -4,7 +4,9 @@ import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
-import { Diamond, ArrowRight, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { AuthShell } from "@/components/app-shell";
+import { inputClass } from "@/components/ui-kit";
+import { ArrowRight, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -17,7 +19,6 @@ function ResetPasswordForm() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const ic = "w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setError("");
@@ -30,54 +31,58 @@ function ResetPasswordForm() {
     finally { setLoading(false); }
   }
 
+  if (success) {
+    return (
+      <div className="mt-6 glass rounded-2xl p-8 text-center" style={{ display: "grid", gap: "1rem", justifyItems: "center" }}>
+        <CheckCircle size={48} className="text-gold" />
+        <h2 className="text-2xl font-bold">Password reset!</h2>
+        <p className="text-muted-foreground text-sm">Redirecting you to sign in...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="glass-panel rounded-2xl p-8">
-      {success ? (
-        <div className="text-center space-y-4"><CheckCircle size={48} className="text-gold-500 mx-auto" /><h2 className="text-2xl font-bold">Password reset!</h2><p className="text-gray-muted text-sm">Redirecting you to sign in...</p></div>
-      ) : (
-        <>
-          <h2 className="text-2xl font-bold mb-1">Reset password</h2><p className="text-gray-muted text-sm mb-6">Enter your new password below.</p>
-          {error && (<div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-6"><AlertCircle size={16} className="text-red-400 shrink-0" /><p className="text-red-400 text-sm">{error}</p></div>)}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-muted mb-1.5">New password</label>
-              <div className="relative">
-                <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" className={`${ic} pr-12`} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-muted hover:text-white transition" tabIndex={-1}>
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-muted mb-1.5">Confirm password</label>
-              <div className="relative">
-                <input type={showConfirm ? "text" : "password"} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className={`${ic} pr-12`} />
-                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-muted hover:text-white transition" tabIndex={-1}>
-                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-            <button type="submit" disabled={loading} className="button-gold w-full rounded-lg py-3 flex items-center justify-center gap-2 text-[15px] disabled:opacity-50">{loading ? <div className="w-5 h-5 border-2 border-dark-950 border-t-transparent rounded-full animate-spin" /> : <>Reset password <ArrowRight size={16} strokeWidth={2.5} /></>}</button>
-          </form>
-        </>
-      )}
+    <div className="mt-6">
+      {error && (<div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-xl p-3 mb-6"><AlertCircle size={16} className="text-danger shrink-0" /><p className="text-danger text-sm">{error}</p></div>)}
+      <form onSubmit={handleSubmit} className="grid gap-4">
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">New password</span>
+          <span className="relative block">
+            <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" className={`${inputClass} pr-12`} />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition" tabIndex={-1}>
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </span>
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">Confirm password</span>
+          <span className="relative block">
+            <input type={showConfirm ? "text" : "password"} required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" className={`${inputClass} pr-12`} />
+            <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition" tabIndex={-1}>
+              {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </span>
+        </label>
+        <button type="submit" disabled={loading} className="button-gold w-full rounded-xl py-3 flex items-center justify-center gap-2 text-[15px] disabled:opacity-50">{loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/70 border-t-transparent" /> : <>Reset password <ArrowRight size={16} strokeWidth={2.5} /></>}</button>
+      </form>
+      <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
+        Protected by session-bound audit logging.{" "}
+        <Link href="/login" className="text-gold hover:text-gold-bright transition">Back to sign in</Link>
+      </p>
     </div>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gold-500/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="w-full max-w-md relative z-10">
-        <Link href="/" className="flex items-center gap-3 justify-center mb-10 group">
-          <div className="w-10 h-10 rounded-lg border border-gold-500/30 flex items-center justify-center group-hover:bg-gold-500/10 transition-colors"><Diamond size={22} className="text-gold-500" strokeWidth={1.5} /></div>
-          <span className="text-2xl font-bold tracking-tight">Shaqal <span className="text-gold-500">TradeOS</span></span>
-        </Link>
-        <Suspense fallback={<div className="glass-panel rounded-2xl p-8 text-center text-gray-muted">Loading...</div>}>
-          <ResetPasswordForm />
-        </Suspense>
-      </div>
-    </div>
+    <AuthShell
+      eyebrow="Account recovery"
+      title="Reset password"
+      subtitle="Choose a new password for your TradeOS account."
+    >
+      <Suspense fallback={<div className="mt-6 glass rounded-2xl p-8 text-center text-muted-foreground">Loading...</div>}>
+        <ResetPasswordForm />
+      </Suspense>
+    </AuthShell>
   );
 }

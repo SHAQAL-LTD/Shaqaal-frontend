@@ -15,10 +15,10 @@ import {
 } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
-  PENDING: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  PROCESSING: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  COMPLETED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  FAILED: "bg-red-500/10 text-red-400 border-red-500/20",
+  PENDING: "bg-gold/10 text-gold-bright border-gold/40",
+  PROCESSING: "bg-chart-2/10 text-chart-2 border-chart-2/40",
+  COMPLETED: "bg-success/10 text-success border-success/40",
+  FAILED: "bg-danger/10 text-danger border-danger/40",
 };
 
 const STATUS_ICONS: Record<string, React.ElementType> = {
@@ -47,23 +47,20 @@ export default function PaymentsPage() {
   }, [page]);
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 lg:p-10 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <Link href="/dashboard" className="p-2 rounded-xl hover:bg-white/[0.04] text-gray-muted hover:text-white transition">
           <ArrowLeft size={18} />
         </Link>
-        <div>
-          <h1 className="text-xl font-bold">Payments</h1>
-          <p className="text-[13px] text-gray-muted">Track your payment history and transactions</p>
-        </div>
+        <p className="text-[13px] text-muted-foreground">Track your payment history and transactions</p>
       </div>
 
       {!loading && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="glass-panel rounded-2xl p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                <CheckCircle2 size={18} className="text-emerald-400" />
+              <div className="w-9 h-9 rounded-xl bg-success/10 flex items-center justify-center">
+                <CheckCircle2 size={18} className="text-success" />
               </div>
               <p className="text-[12px] text-gray-muted font-medium uppercase tracking-wider">Completed</p>
             </div>
@@ -71,8 +68,8 @@ export default function PaymentsPage() {
           </div>
           <div className="glass-panel rounded-2xl p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                <Loader2 size={18} className="text-blue-400" />
+              <div className="w-9 h-9 rounded-xl bg-chart-2/10 flex items-center justify-center">
+                <Loader2 size={18} className="text-chart-2" />
               </div>
               <p className="text-[12px] text-gray-muted font-medium uppercase tracking-wider">Processing</p>
             </div>

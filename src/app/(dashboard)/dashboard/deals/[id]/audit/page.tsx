@@ -19,15 +19,15 @@ import {
 
 const ACTION_COLORS: Record<string, string> = {
   STAGE_ADVANCED: "bg-gold-500/10 text-gold-500 border-gold-500/20",
-  DEAL_CREATED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  DOCUMENT_UPLOADED: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  PARTY_ADDED: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-  PARTY_REMOVED: "bg-red-500/10 text-red-400 border-red-500/20",
-  COMMISSION_LOCKED: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  COMMISSION_NODE_ADDED: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-  KYC_SUBMITTED: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-  KYC_APPROVED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  KYC_REJECTED: "bg-red-500/10 text-red-400 border-red-500/20",
+  DEAL_CREATED: "bg-success/10 text-success border-success/40",
+  DOCUMENT_UPLOADED: "bg-chart-2/10 text-chart-2 border-chart-2/40",
+  PARTY_ADDED: "bg-chart-1/10 text-chart-1 border-chart-1/40",
+  PARTY_REMOVED: "bg-danger/10 text-danger border-danger/40",
+  COMMISSION_LOCKED: "bg-gold/10 text-gold-bright border-gold/40",
+  COMMISSION_NODE_ADDED: "bg-secondary/60 text-muted-foreground border-border",
+  KYC_SUBMITTED: "bg-chart-4/10 text-chart-4 border-chart-4/40",
+  KYC_APPROVED: "bg-success/10 text-success border-success/40",
+  KYC_REJECTED: "bg-danger/10 text-danger border-danger/40",
 };
 
 function formatAction(action: string): string {
@@ -87,7 +87,7 @@ export default function DealAuditPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-6 animate-in fade-in duration-700 max-w-4xl">
+    <div className="p-4 md:p-8 lg:p-10 space-y-6 animate-fade-in-up max-w-4xl">
       {/* Back */}
       <button
         onClick={() => router.back()}
@@ -98,10 +98,7 @@ export default function DealAuditPage() {
 
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Audit Trail</h2>
-          <p className="text-gray-muted mt-1">Full lifecycle history for this deal.</p>
-        </div>
+        <p className="text-sm text-muted-foreground">Full lifecycle history for this deal.</p>
         {events.length > 0 && canExport && (
           <button
             onClick={handleExport}
@@ -121,9 +118,9 @@ export default function DealAuditPage() {
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-          <AlertCircle size={16} className="text-red-400 shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-lg p-3">
+          <AlertCircle size={16} className="text-danger shrink-0" />
+          <p className="text-danger text-sm">{error}</p>
         </div>
       )}
 

@@ -127,18 +127,15 @@ export default function DealDocumentsPage() {
         >
           <ArrowLeft size={20} className="text-gray-muted" />
         </button>
-        <div>
-          <h1 className="text-2xl font-bold">Documents</h1>
-          <p className="text-sm text-gray-muted">
-            Deal {deal?.utid || dealId}
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {deal?.utid || dealId}
+        </p>
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-          <AlertCircle size={16} className="text-red-400 shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-xl p-3">
+          <AlertCircle size={16} className="text-danger shrink-0" />
+          <p className="text-danger text-sm">{error}</p>
         </div>
       )}
 
@@ -186,7 +183,7 @@ export default function DealDocumentsPage() {
                     <p className="text-sm font-medium truncate">{file.name}</p>
                     <p className="text-[11px] text-gray-muted">{formatBytes(file.size)}</p>
                   </div>
-                  <button onClick={() => removeFile(i)} className="p-1 text-red-400 hover:text-red-300 transition">
+                  <button onClick={() => removeFile(i)} className="p-1 text-danger hover:text-danger transition">
                     <Trash2 size={14} />
                   </button>
                 </div>

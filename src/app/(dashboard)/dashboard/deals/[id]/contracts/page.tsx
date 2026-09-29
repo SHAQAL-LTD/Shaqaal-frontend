@@ -23,7 +23,7 @@ const CONTRACT_TEMPLATES = [
     label: "NCNDA",
     description: "Non-Circumvention, Non-Disclosure, and Confidentiality Agreement",
     icon: Shield,
-    color: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+    color: "text-chart-2 bg-chart-2/10 border-chart-2/40",
     roles: ["BROKER", "COMPLIANCE_OFFICER", "SUPPLIER", "BUYER"],
   },
   {
@@ -39,7 +39,7 @@ const CONTRACT_TEMPLATES = [
     label: "SPA",
     description: "Sale and Purchase Agreement",
     icon: FileSignature,
-    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    color: "text-success bg-success/10 border-success/40",
     roles: ["BROKER", "COMPLIANCE_OFFICER", "SUPPLIER", "BUYER"],
   },
 ];
@@ -90,7 +90,7 @@ export default function ContractsPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-6 animate-in fade-in duration-700 max-w-4xl">
+    <div className="p-4 md:p-8 lg:p-10 space-y-6 animate-fade-in-up max-w-4xl">
       {/* Back */}
       <button
         onClick={() => router.back()}
@@ -100,22 +100,19 @@ export default function ContractsPage() {
       </button>
 
       {/* Header */}
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Contracts</h2>
-        <p className="text-gray-muted mt-1">Generate and manage deal contracts from templates.</p>
-      </div>
+      <p className="max-w-2xl text-sm text-muted-foreground">Generate and manage deal contracts from templates.</p>
 
       {/* Alerts */}
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-          <AlertCircle size={16} className="text-red-400 shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-lg p-3">
+          <AlertCircle size={16} className="text-danger shrink-0" />
+          <p className="text-danger text-sm">{error}</p>
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
-          <CheckCircle size={16} className="text-emerald-400 shrink-0" />
-          <p className="text-emerald-400 text-sm">{success}</p>
+        <div className="flex items-center gap-2 bg-success/10 border border-success/40 rounded-lg p-3">
+          <CheckCircle size={16} className="text-success shrink-0" />
+          <p className="text-success text-sm">{success}</p>
         </div>
       )}
 

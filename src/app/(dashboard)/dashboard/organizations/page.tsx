@@ -48,18 +48,15 @@ export default function OrganizationsPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-6 animate-in fade-in duration-700">
+    <div className="p-4 md:p-8 lg:p-10 space-y-6 animate-fade-in-up">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Organizations</h2>
-          <p className="text-gray-muted mt-1">Manage your KYB-registered entities.</p>
-        </div>
-        <button onClick={() => setShowCreate(true)} className="button-gold px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium">
+        <p className="max-w-xl text-sm text-muted-foreground">Manage your KYB-registered entities and counterparties.</p>
+        <button onClick={() => setShowCreate(true)} className="button-gold shrink-0 px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium">
           <Plus size={16} /> New Organization
         </button>
       </div>
 
-      {error && <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3"><AlertCircle size={16} className="text-red-400 shrink-0" /><p className="text-red-400 text-sm">{error}</p></div>}
+      {error && <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-lg p-3"><AlertCircle size={16} className="text-danger shrink-0" /><p className="text-danger text-sm">{error}</p></div>}
 
       {loading && <div className="flex items-center justify-center py-16"><Loader2 size={32} className="text-gold-500 animate-spin" /></div>}
 
@@ -78,7 +75,7 @@ export default function OrganizationsPage() {
             <Link key={org.id} href={`/dashboard/organizations/${org.id}`} className="glass-panel rounded-xl p-6 hover:bg-dark-800/50 hover:border-gold-500/20 transition group">
               <div className="flex items-start justify-between mb-3">
                 <div className="h-10 w-10 rounded-lg bg-gold-500/10 flex items-center justify-center text-gold-500 font-bold text-sm shrink-0">{org.name.slice(0, 2).toUpperCase()}</div>
-                {org.verified && <BadgeCheck size={16} className="text-emerald-400 shrink-0" />}
+                {org.verified && <BadgeCheck size={16} className="text-success shrink-0" />}
               </div>
               <h3 className="font-semibold mb-1 group-hover:text-gold-500 transition">{org.name}</h3>
               {org.legalName && <p className="text-xs text-gray-muted truncate mb-2">{org.legalName}</p>}
@@ -100,7 +97,7 @@ export default function OrganizationsPage() {
               <h3 className="text-xl font-bold">New Organization</h3>
               <button onClick={() => setShowCreate(false)} className="text-gray-muted hover:text-white transition"><X size={20} /></button>
             </div>
-            {createError && <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-4"><AlertCircle size={16} className="text-red-400 shrink-0" /><p className="text-red-400 text-sm">{createError}</p></div>}
+            {createError && <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-lg p-3 mb-4"><AlertCircle size={16} className="text-danger shrink-0" /><p className="text-danger text-sm">{createError}</p></div>}
             <div className="space-y-4">
               <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Trading name *</label><input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ashanti Madalali Coop" className={ic} /></div>
               <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Legal name</label><input type="text" value={legalName} onChange={(e) => setLegalName(e.target.value)} placeholder="Optional registered name" className={ic} /></div>

@@ -20,10 +20,10 @@ import {
 } from "lucide-react";
 
 const PARTY_ROLES = [
-  { value: "SELLER", label: "Seller", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
-  { value: "BUYER", label: "Buyer", color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
+  { value: "SELLER", label: "Seller", color: "text-success bg-success/10 border-success/40" },
+  { value: "BUYER", label: "Buyer", color: "text-chart-2 bg-chart-2/10 border-chart-2/40" },
   { value: "BROKER", label: "Broker", color: "text-gold-500 bg-gold-500/10 border-gold-500/20" },
-  { value: "LOGISTICS", label: "Logistics", color: "text-violet-400 bg-violet-500/10 border-violet-500/20" },
+  { value: "LOGISTICS", label: "Logistics", color: "text-chart-1 bg-chart-1/10 border-chart-1/40" },
 ];
 
 export default function DealPartiesPage() {
@@ -117,7 +117,7 @@ export default function DealPartiesPage() {
   );
 
   return (
-    <div className="p-4 md:p-8 space-y-6 animate-in fade-in duration-700 max-w-4xl">
+    <div className="p-4 md:p-8 lg:p-10 space-y-6 animate-fade-in-up max-w-4xl">
       {/* Back */}
       <button
         onClick={() => router.back()}
@@ -128,10 +128,7 @@ export default function DealPartiesPage() {
 
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Deal Parties</h2>
-          <p className="text-gray-muted mt-1">Manage organizations linked to this deal.</p>
-        </div>
+        <p className="text-sm text-muted-foreground">Manage organizations linked to this deal.</p>
         {canManage && (
           <button
             onClick={() => setShowAdd(!showAdd)}
@@ -144,15 +141,15 @@ export default function DealPartiesPage() {
 
       {/* Alerts */}
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-          <AlertCircle size={16} className="text-red-400 shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-lg p-3">
+          <AlertCircle size={16} className="text-danger shrink-0" />
+          <p className="text-danger text-sm">{error}</p>
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
-          <CheckCircle size={16} className="text-emerald-400 shrink-0" />
-          <p className="text-emerald-400 text-sm">{success}</p>
+        <div className="flex items-center gap-2 bg-success/10 border border-success/40 rounded-lg p-3">
+          <CheckCircle size={16} className="text-success shrink-0" />
+          <p className="text-success text-sm">{success}</p>
         </div>
       )}
 
@@ -288,7 +285,7 @@ export default function DealPartiesPage() {
                   <button
                     onClick={() => handleRemove(party.organizationId)}
                     disabled={removing === party.organizationId}
-                    className="text-gray-muted hover:text-red-400 transition p-2 rounded-lg hover:bg-red-500/10 disabled:opacity-50"
+                    className="text-gray-muted hover:text-danger transition p-2 rounded-lg hover:bg-danger/10 disabled:opacity-50"
                     title="Remove party"
                   >
                     {removing === party.organizationId ? (

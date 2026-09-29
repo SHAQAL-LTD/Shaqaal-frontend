@@ -4,7 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Diamond, ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { AuthShell } from "@/components/app-shell";
+import { GoldButton, inputClass } from "@/components/ui-kit";
+import { ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,106 +33,97 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-950 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gold-500/10 blur-[120px] rounded-full pointer-events-none" />
-
-      <div className="w-full max-w-md relative z-10">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 justify-center mb-10 group">
-          <div className="w-10 h-10 rounded-lg border border-gold-500/30 flex items-center justify-center group-hover:bg-gold-500/10 transition-colors">
-            <Diamond size={22} className="text-gold-500" strokeWidth={1.5} />
-          </div>
-          <span className="text-2xl font-bold tracking-tight">
-            Shaqal <span className="text-gold-500">TradeOS</span>
-          </span>
-        </Link>
-
-        {/* Card */}
-        <div className="glass-panel rounded-2xl p-8">
-          <h2 className="text-2xl font-bold mb-1">Welcome back</h2>
-          <p className="text-gray-muted text-sm mb-8">Sign in to access the TradeOS pipeline.</p>
-
-          {error && (
-            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-6">
-              <AlertCircle size={16} className="text-red-400 shrink-0" />
-              <p className="text-red-400 text-sm">{error}</p>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-muted mb-1.5">
-                Email address
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
-                className="w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-muted mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full bg-dark-800 border border-dark-700 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-muted hover:text-white transition"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end">
-              <Link href="/forgot-password" className="text-sm text-gold-500 hover:text-gold-400 transition">
-                Forgot password?
-              </Link>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="button-gold w-full rounded-lg py-3 flex items-center justify-center gap-2 text-[15px] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-dark-950 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  Sign in
-                  <ArrowRight size={16} strokeWidth={2.5} />
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        <p className="text-center text-sm text-gray-muted mt-6">
+    <AuthShell
+      eyebrow="Secure access"
+      title="Welcome back"
+      subtitle="Enter your credentials to access your deal rooms and approvals."
+      footer={
+        <p className="text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-gold-500 hover:text-gold-400 font-medium transition">
+          <Link
+            href="/register"
+            className="font-semibold text-gold-bright transition-colors hover:text-gold hover:underline"
+          >
             Create one
           </Link>
         </p>
+      }
+    >
+      <div className="mt-6">
+        {error && (
+          <div className="mb-6 flex items-center gap-2 rounded-xl border border-danger/40 bg-danger/10 p-3">
+            <AlertCircle size={16} className="shrink-0 text-danger" />
+            <p className="text-sm text-danger">{error}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="grid gap-4">
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Work email
+            </span>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@company.com"
+              className={inputClass}
+            />
+          </label>
+
+          <label className="block">
+            <span className="mb-1.5 flex items-center justify-between text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Password
+              <Link
+                href="/forgot-password"
+                className="normal-case tracking-normal text-gold transition-colors hover:text-gold-bright"
+              >
+                Forgot password?
+              </Link>
+            </span>
+            <span className="relative block">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••••"
+                className={`${inputClass} pr-12`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition hover:text-foreground"
+                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </span>
+          </label>
+
+          <GoldButton type="submit" disabled={loading} className="mt-2 w-full py-3 text-base">
+            {loading ? (
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground/70 border-t-transparent" />
+            ) : (
+              <>
+                Sign in securely
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </GoldButton>
+        </form>
+
+        <p className="mt-8 text-xs leading-relaxed text-muted-foreground">
+          Protected by device attestation and session-bound audit logging. Every action is
+          recorded against your operator identity.
+        </p>
       </div>
-    </div>
+    </AuthShell>
   );
 }

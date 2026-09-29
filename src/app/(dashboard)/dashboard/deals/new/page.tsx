@@ -71,23 +71,20 @@ export default function NewDealPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-6 animate-in fade-in duration-700 max-w-2xl">
+    <div className="p-4 md:p-8 lg:p-10 space-y-6 animate-fade-in-up max-w-2xl">
       <Link href="/dashboard/deals" className="flex items-center gap-2 text-gray-muted hover:text-white transition text-sm">
         <ArrowLeft size={16} /> Back to deals
       </Link>
 
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">New Deal</h2>
-        <p className="text-gray-muted mt-1">Create a new commodity transaction.</p>
-      </div>
+      <p className="max-w-2xl text-sm text-muted-foreground">Create a new commodity transaction — Stage 1 opens on submission.</p>
 
       {/* Progress */}
       <div className="flex gap-2">{[0, 1, 2].map((i) => (<div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= step ? "bg-gold-500" : "bg-dark-700"}`} />))}</div>
 
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-          <AlertCircle size={16} className="text-red-400 shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-lg p-3">
+          <AlertCircle size={16} className="text-danger shrink-0" />
+          <p className="text-danger text-sm">{error}</p>
         </div>
       )}
 

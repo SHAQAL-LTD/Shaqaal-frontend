@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { Deal, PageResponse } from "@/lib/types";
+import { Badge, Card, GoldButton, SectionTitle, inputClass } from "@/components/ui-kit";
 import {
-  FileText,
   Plus,
   ChevronLeft,
   ChevronRight,
@@ -29,22 +29,16 @@ const STAGE_LABELS: Record<string, string> = {
   STAGE_10_SETTLEMENT: "Settlement",
 };
 
-const STAGE_COLORS: Record<string, string> = {
-  STAGE_01_REGISTRATION: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  STAGE_02_SUPPLIER_VERIFICATION: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
-  STAGE_03_BUYER_ONBOARDING: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-  STAGE_04_SPA_SIGNATURE: "bg-gold-500/10 text-gold-500 border-gold-500/20",
-  STAGE_05_PROOF_OF_FUNDS: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  STAGE_06_ADVANCE_PAYMENT: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  STAGE_07_ORIGIN_LOGISTICS: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-  STAGE_08_SHIPPING: "bg-teal-500/10 text-teal-400 border-teal-500/20",
-  STAGE_09_DESTINATION_CLEARANCE: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  STAGE_10_SETTLEMENT: "bg-green-500/10 text-green-400 border-green-500/20",
-};
-
 function stageNumber(stage: string): number {
   const match = stage.match(/STAGE_(\d+)/);
   return match ? parseInt(match[1], 10) : 0;
+}
+
+function stageBadge(stage: string): "gold" | "green" | "muted" {
+  const n = stageNumber(stage);
+  if (n >= 10) return "green";
+  if (n >= 4 && n <= 6) return "gold";
+  return "muted";
 }
 
 export default function DealsListPage() {
@@ -81,97 +75,98 @@ export default function DealsListPage() {
   );
 
   return (
-    <div className="p-4 md:p-8 space-y-6 animate-in fade-in duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Deals</h2>
-          <p className="text-gray-muted mt-1">Manage your commodity transactions across 10 stages.</p>
-        </div>
-        <Link
-          href="/dashboard/deals/new"
-          className="button-gold px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium"
-        >
-          <Plus size={16} /> New Deal
-        </Link>
-      </div>
-
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-muted" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by UTID, mineral, country..."
-          className="w-full bg-dark-800 border border-dark-700 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:border-gold-500 focus:ring-1 focus:ring-gold-500/50 focus:outline-none transition"
-        />
-      </div>
-
-      {/* Error */}
+    <div className="p-4 md:p-8 lg:p-10 space-y-6 animate-fade-in-up">
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-          <AlertCircle size={16} className="text-red-400 shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-xl p-3">
+          <AlertCircle size={16} className="text-danger shrink-0" />
+          <p className="text-danger text-sm">{error}</p>
         </div>
       )}
 
-      {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-16">
-          <Loader2 size={32} className="text-gold-500 animate-spin" />
+          <Loader2 size={32} className="text-gold animate-spin" />
         </div>
       )}
 
       {/* Empty State */}
       {!loading && !error && deals.length === 0 && (
-        <div className="glass-panel rounded-2xl p-12 text-center">
-          <Package size={48} className="text-dark-600 mx-auto mb-4" />
+        <Card className="p-12 text-center">
+          <Package size={48} className="text-muted-foreground/50 mx-auto mb-4" />
           <h3 className="text-xl font-semibold mb-2">No deals yet</h3>
-          <p className="text-gray-muted text-sm mb-6">Create your first deal to get started with the pipeline.</p>
-          <Link href="/dashboard/deals/new" className="button-gold px-6 py-3 rounded-lg inline-flex items-center gap-2 text-sm font-medium">
+          <p className="text-muted-foreground text-sm mb-6">Create your first deal to get started with the pipeline.</p>
+          <Link href="/dashboard/deals/new" className="button-gold px-6 py-3 rounded-xl inline-flex items-center gap-2 text-sm font-medium">
             <Plus size={16} /> Create Deal
           </Link>
-        </div>
+        </Card>
       )}
 
-      {/* Deals Table */}
+      {/* Deals */}
       {!loading && filtered.length > 0 && (
-        <div className="glass-panel rounded-xl border border-dark-800 overflow-hidden">
-          <div className="overflow-x-auto">
+        <Card>
+          <SectionTitle
+            title="Active deal book"
+            subtitle="Each deal is an isolated, audit-locked room."
+            action={
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search UTID, mineral, country…"
+                    className={`${inputClass} pl-9 sm:w-64`}
+                  />
+                </div>
+                <Link href="/dashboard/deals/new">
+                  <GoldButton type="button">
+                    <Plus size={16} /> New Deal
+                  </GoldButton>
+                </Link>
+              </div>
+            }
+          />
+
+          {/* Desktop table */}
+          <div className="mt-5 hidden overflow-x-auto lg:block">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-dark-800 bg-dark-900/50">
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-gray-muted uppercase tracking-wider">UTID</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-gray-muted uppercase tracking-wider">Mineral</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-gray-muted uppercase tracking-wider">Quantity</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-gray-muted uppercase tracking-wider">Route</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-gray-muted uppercase tracking-wider">Stage</th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-gray-muted uppercase tracking-wider">Created</th>
-                  <th className="px-6 py-4"></th>
+                <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <th className="py-3 pr-4 font-medium">UTID</th>
+                  <th className="py-3 pr-4 font-medium">Mineral</th>
+                  <th className="py-3 pr-4 font-medium">Quantity</th>
+                  <th className="py-3 pr-4 font-medium">Route</th>
+                  <th className="py-3 pr-4 font-medium">Stage</th>
+                  <th className="py-3 pr-4 font-medium">Created</th>
+                  <th className="py-3 text-right font-medium">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((deal) => (
-                  <tr key={deal.id} className="border-b border-dark-800/50 hover:bg-dark-800/30 transition">
-                    <td className="px-6 py-4 font-mono text-xs text-gold-500">{deal.utid || "—"}</td>
-                    <td className="px-6 py-4 font-medium capitalize">{deal.mineralType}</td>
-                    <td className="px-6 py-4 text-gray-300">{deal.quantityKg.toLocaleString()} kg</td>
-                    <td className="px-6 py-4 text-gray-300">
+                  <tr key={deal.id} className="border-b border-border/60 transition-colors hover:bg-secondary/40">
+                    <td className="tnum py-4 pr-4 font-mono text-xs text-gold">{deal.utid || "—"}</td>
+                    <td className="py-4 pr-4 font-medium capitalize">{deal.mineralType}</td>
+                    <td className="tnum py-4 pr-4">{deal.quantityKg.toLocaleString()} kg</td>
+                    <td className="py-4 pr-4 text-muted-foreground">
                       <span className="uppercase">{deal.originCountry}</span>
-                      <span className="text-dark-600 mx-1.5">→</span>
+                      <span className="mx-1.5 text-muted-foreground/60">→</span>
                       <span className="uppercase">{deal.destinationCountry}</span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${STAGE_COLORS[deal.currentStage] || "bg-dark-800 text-gray-400 border-dark-700"}`}>
-                        Stage {stageNumber(deal.currentStage)}
-                      </span>
+                    <td className="py-4 pr-4">
+                      <Badge tone={stageBadge(deal.currentStage)}>
+                        Stage {stageNumber(deal.currentStage)} · {STAGE_LABELS[deal.currentStage] || ""}
+                      </Badge>
                     </td>
-                    <td className="px-6 py-4 text-gray-muted text-xs">
+                    <td className="tnum py-4 pr-4 text-xs text-muted-foreground">
                       {new Date(deal.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4">
-                      <Link href={`/dashboard/deals/${deal.id}`} className="text-gold-500 hover:text-gold-400 transition p-2 rounded-lg hover:bg-gold-500/10 inline-flex">
+                    <td className="py-4 text-right">
+                      <Link
+                        href={`/dashboard/deals/${deal.id}`}
+                        className="inline-flex rounded-lg border border-border p-2 text-muted-foreground transition hover:border-gold/50 hover:text-gold"
+                        aria-label={`Open deal ${deal.utid || deal.id}`}
+                      >
                         <ArrowRight size={16} />
                       </Link>
                     </td>
@@ -181,29 +176,59 @@ export default function DealsListPage() {
             </table>
           </div>
 
+          {/* Mobile cards */}
+          <div className="mt-5 grid gap-3 lg:hidden">
+            {filtered.map((deal) => (
+              <Link
+                key={deal.id}
+                href={`/dashboard/deals/${deal.id}`}
+                className="block rounded-2xl border border-border bg-secondary/30 p-4 transition-colors hover:border-gold/40"
+              >
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium capitalize">{deal.mineralType}</p>
+                    <p className="tnum mt-1 truncate text-xs font-mono text-gold">
+                      {deal.utid || "UTID pending"}
+                    </p>
+                  </div>
+                  <Badge tone={stageBadge(deal.currentStage)}>
+                    Stage {stageNumber(deal.currentStage)}
+                  </Badge>
+                </div>
+                <div className="tnum mt-3 flex justify-between text-xs text-muted-foreground">
+                  <span>{deal.quantityKg.toLocaleString()} kg</span>
+                  <span className="uppercase">{deal.originCountry} → {deal.destinationCountry}</span>
+                  <span>{new Date(deal.createdAt).toLocaleDateString()}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-dark-800 bg-dark-900/30">
-              <p className="text-xs text-gray-muted">Page {page + 1} of {totalPages}</p>
+            <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+              <p className="tnum text-xs text-muted-foreground">Page {page + 1} of {totalPages}</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPage(Math.max(0, page - 1))}
                   disabled={page === 0}
-                  className="p-2 rounded-lg border border-dark-700 text-gray-muted hover:bg-dark-800 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-2 rounded-lg border border-border text-muted-foreground hover:bg-secondary/60 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  aria-label="Previous page"
                 >
                   <ChevronLeft size={16} />
                 </button>
                 <button
                   onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
                   disabled={page >= totalPages - 1}
-                  className="p-2 rounded-lg border border-dark-700 text-gray-muted hover:bg-dark-800 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-2 rounded-lg border border-border text-muted-foreground hover:bg-secondary/60 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                  aria-label="Next page"
                 >
                   <ChevronRight size={16} />
                 </button>
               </div>
             </div>
           )}
-        </div>
+        </Card>
       )}
     </div>
   );

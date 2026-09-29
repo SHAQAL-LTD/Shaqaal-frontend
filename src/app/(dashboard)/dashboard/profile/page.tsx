@@ -30,10 +30,10 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const VERIFICATION_COLORS: Record<string, string> = {
-  VERIFIED: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-  PENDING: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-  UNVERIFIED: "text-gray-400 bg-dark-800 border-dark-700",
-  REJECTED: "text-red-400 bg-red-500/10 border-red-500/20",
+  VERIFIED: "text-success bg-success/10 border-success/40",
+  PENDING: "text-gold-bright bg-gold/10 border-gold/40",
+  UNVERIFIED: "text-muted-foreground bg-secondary border-border",
+  REJECTED: "text-danger bg-danger/10 border-danger/40",
 };
 
 export default function ProfilePage() {
@@ -81,24 +81,21 @@ export default function ProfilePage() {
   const verStatus = user.verificationStatus || "UNVERIFIED";
 
   return (
-    <div className="p-4 md:p-8 space-y-8 animate-in fade-in duration-700 max-w-3xl">
+    <div className="p-4 md:p-8 lg:p-10 space-y-8 animate-fade-in-up max-w-3xl">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">My Profile</h2>
-          <p className="text-gray-muted mt-1">View and manage your account information.</p>
-        </div>
+        <p className="max-w-xl text-sm text-muted-foreground">View and manage your operator identity, verification tier and account information.</p>
         {!editing ? (
           <button onClick={() => setEditing(true)} className="button-gold px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium">
             <Pencil size={16} /> Edit Profile
           </button>
         ) : (
           <div className="flex gap-2">
-            <button onClick={handleCancel} className="border border-dark-700 px-4 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-dark-800 transition">
+            <button onClick={handleCancel} className="border border-border px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium hover:bg-secondary/60 transition">
               <X size={16} /> Cancel
             </button>
-            <button onClick={handleSave} disabled={loading} className="button-gold px-5 py-2.5 rounded-lg flex items-center gap-2 text-sm font-medium disabled:opacity-50">
-              {loading ? <div className="w-4 h-4 border-2 border-dark-950 border-t-transparent rounded-full animate-spin" /> : <Save size={16} />}
+            <button onClick={handleSave} disabled={loading} className="button-gold px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium disabled:opacity-50">
+              {loading ? <span className="w-4 h-4 border-2 border-primary-foreground/70 border-t-transparent rounded-full animate-spin" /> : <Save size={16} />}
               Save Changes
             </button>
           </div>
@@ -107,33 +104,33 @@ export default function ProfilePage() {
 
       {/* Alerts */}
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-          <AlertCircle size={16} className="text-red-400 shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-xl p-3">
+          <AlertCircle size={16} className="text-danger shrink-0" />
+          <p className="text-danger text-sm">{error}</p>
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
-          <CheckCircle size={16} className="text-emerald-400 shrink-0" />
-          <p className="text-emerald-400 text-sm">{success}</p>
+        <div className="flex items-center gap-2 bg-success/10 border border-success/40 rounded-xl p-3">
+          <CheckCircle size={16} className="text-success shrink-0" />
+          <p className="text-success text-sm">{success}</p>
         </div>
       )}
 
       {/* Avatar + Name Card */}
-      <div className="glass-panel rounded-2xl p-8">
+      <div className="glass rounded-2xl p-6 sm:p-8">
         <div className="flex items-center gap-6 mb-8">
-          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-2xl shrink-0 shadow-lg shadow-gold-500/20">
+          <div className="h-20 w-20 rounded-2xl bg-gradient-to-b from-gold-bright to-gold flex items-center justify-center text-primary-foreground font-display font-bold text-2xl shrink-0 shadow-lg shadow-gold/20">
             {initials}
           </div>
-          <div>
-            <h3 className="text-2xl font-bold">{user.fullName}</h3>
-            <p className="text-gray-muted text-sm">{user.email}</p>
-            <div className="flex items-center gap-2 mt-2">
+          <div className="min-w-0">
+            <h3 className="font-display text-2xl font-semibold truncate">{user.fullName}</h3>
+            <p className="text-muted-foreground text-sm truncate">{user.email}</p>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
               <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${VERIFICATION_COLORS[verStatus] || VERIFICATION_COLORS.UNVERIFIED}`}>
                 <BadgeCheck size={12} />
                 {verStatus}
               </span>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-gold-500/10 text-gold-500 border border-gold-500/20">
+              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-gold/10 text-gold-bright border border-gold/40">
                 {ROLE_LABELS[user.role] || user.role}
               </span>
             </div>

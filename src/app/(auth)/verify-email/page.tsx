@@ -3,8 +3,9 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
-import { CheckCircle2, XCircle, Loader2, Diamond } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { Brand } from "@/components/app-shell";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
@@ -26,40 +27,37 @@ function VerifyEmailContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass-panel rounded-2xl p-8 text-center space-y-6">
-        <Link href="/" className="inline-flex items-center gap-2 mb-2">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center shadow-md shadow-gold-500/20">
-            <Diamond size={18} className="text-dark-950" strokeWidth={2} />
-          </div>
-          <span className="text-lg font-bold tracking-tight text-gradient-gold">SHAQAL</span>
-        </Link>
+      <div className="w-full max-w-md glass rounded-2xl p-8 text-center space-y-6 shadow-2xl shadow-black/40">
+        <div className="flex justify-center">
+          <Brand />
+        </div>
 
         {status === "loading" && (
           <>
-            <Loader2 size={40} className="text-gold-500 animate-spin mx-auto" />
-            <p className="text-[14px] text-gray-muted">Verifying your email...</p>
+            <Loader2 size={40} className="text-gold animate-spin mx-auto" />
+            <p className="text-[14px] text-muted-foreground">Verifying your email...</p>
           </>
         )}
 
         {status === "success" && (
           <>
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto">
-              <CheckCircle2 size={32} className="text-emerald-400" />
+            <div className="w-16 h-16 rounded-2xl bg-success/10 border border-success/40 flex items-center justify-center mx-auto">
+              <CheckCircle2 size={32} className="text-success" />
             </div>
             <h2 className="text-lg font-bold">Email Verified!</h2>
-            <p className="text-[13px] text-gray-muted">{message}</p>
-            <Link href="/login" className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-gold-500 text-dark-950 font-semibold text-[13px] hover:bg-gold-400 transition">Go to Login</Link>
+            <p className="text-[13px] text-muted-foreground">{message}</p>
+            <Link href="/login" className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-gradient-to-b from-gold-bright to-gold text-primary-foreground font-semibold text-[13px] transition hover:-translate-y-0.5">Go to Login</Link>
           </>
         )}
 
         {status === "error" && (
           <>
-            <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto">
-              <XCircle size={32} className="text-red-400" />
+            <div className="w-16 h-16 rounded-2xl bg-danger/10 border border-danger/40 flex items-center justify-center mx-auto">
+              <XCircle size={32} className="text-danger" />
             </div>
             <h2 className="text-lg font-bold">Verification Failed</h2>
-            <p className="text-[13px] text-gray-muted">{message}</p>
-            <Link href="/login" className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-gold-500 text-dark-950 font-semibold text-[13px] hover:bg-gold-400 transition">Back to Login</Link>
+            <p className="text-[13px] text-muted-foreground">{message}</p>
+            <Link href="/login" className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-border bg-secondary/60 text-foreground font-semibold text-[13px] transition hover:border-gold/50 hover:text-gold-bright">Back to Login</Link>
           </>
         )}
       </div>
@@ -69,7 +67,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="text-gold-500 animate-spin" size={32} /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="text-gold animate-spin" size={32} /></div>}>
       <VerifyEmailContent />
     </Suspense>
   );

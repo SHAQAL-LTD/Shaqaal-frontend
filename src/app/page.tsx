@@ -1,259 +1,491 @@
-"use client";
-
-import React from "react";
 import Link from "next/link";
-import hero from "hero.jpg";
 import {
-  ShieldCheck,
   ArrowRight,
-  Diamond,
+  ShieldCheck,
+  Fingerprint,
   Lock,
-  Eye,
-  Zap,
-  Globe,
-  BarChart3,
+  FileCheck2,
+  Boxes,
+  Scale,
+  Globe2,
+  Quote,
+  Check,
   Users,
-  FileCheck,
-  Handshake,
-  CheckCircle2,
+  Gavel,
+  Landmark,
+  Briefcase,
+  Clock3,
+  KeyRound,
+  ServerCog,
 } from "lucide-react";
+import { Brand } from "@/components/app-shell";
+import { Card } from "@/components/ui-kit";
 
-const FEATURES = [
+const features = [
+  {
+    icon: ShieldCheck,
+    title: "Compliance-gated rooms",
+    body: "No deal advances until a compliance officer clears the stage. Every gate is logged against an operator identity.",
+  },
+  {
+    icon: Boxes,
+    title: "Ten linear stages",
+    body: "From mandate intake to final settlement, each deal follows one auditable pipeline — no side channels, no lost paperwork.",
+  },
   {
     icon: Lock,
-    title: "End-to-End Encryption",
-    desc: "AES-256 encryption for all documents at rest and TLS 1.3 in transit. Your data never touches unprotected storage.",
+    title: "Encrypted document vault",
+    body: "SGS assays, POF, SPA drafts and BLs stored with per-party access control and tamper-evident hashing.",
   },
   {
-    icon: Eye,
-    title: "Full Audit Trail",
-    desc: "Every action is logged with actor, timestamp, and before/after snapshots. Exportable for regulatory compliance.",
+    icon: Fingerprint,
+    title: "UTID-sealed completion",
+    body: "Completed transactions are sealed with a cryptographic Unique Transaction ID that anchors the full audit chain.",
   },
   {
-    icon: Zap,
-    title: "Stage-Gated Pipeline",
-    desc: "10-stage compliance pipeline — each gate requires verified documents before the deal can advance.",
+    icon: Scale,
+    title: "Commission splits",
+    body: "Model multi-tier broker trees that always reconcile to exactly 100% before payout instructions are released.",
   },
   {
-    icon: FileCheck,
-    title: "Smart Document Vault",
-    desc: "Upload, verify, and retrieve deal documents with SHA-256 integrity hashing and role-based access control.",
+    icon: Globe2,
+    title: "Cross-border KYC",
+    body: "Country-aware onboarding for UAE, Ghana, DRC and beyond, with automatic sanctions and PEP screening.",
+  },
+];
+
+const stats = [
+  { value: "4,182", label: "Deals settled" },
+  { value: "$3.1B", label: "Contract value processed" },
+  { value: "27", label: "Jurisdictions covered" },
+  { value: "100%", label: "Actions hash-chained" },
+];
+
+const stages = [
+  { name: "Mandate intake", note: "Seller mandate, corporate docs, authority chain" },
+  { name: "KYC & screening", note: "Sanctions, PEP and adverse-media checks" },
+  { name: "LOI exchange", note: "Counter-signed intent with commercial terms" },
+  { name: "Proof of product", note: "Warehouse receipt or origin certification" },
+  { name: "Proof of funds", note: "Bank-verified POF or RWA confirmation" },
+  { name: "Assay & inspection", note: "SGS / Alex Stewart report attached" },
+  { name: "SPA execution", note: "Contract signed by all mandated parties" },
+  { name: "Escrow funding", note: "Funds confirmed with escrow agent" },
+  { name: "Logistics & BL", note: "Shipment booked, bill of lading issued" },
+  { name: "UTID settlement", note: "Payout released, transaction sealed" },
+];
+
+const roles = [
+  {
+    icon: Briefcase,
+    role: "Brokers & mandates",
+    body: "Open a deal room, invite counterparties and prove your position without exposing your principal.",
+  },
+  {
+    icon: Landmark,
+    role: "Buyers & refineries",
+    body: "See verified origin, assay and logistics evidence in one place before releasing capital.",
+  },
+  {
+    icon: Gavel,
+    role: "Compliance officers",
+    body: "Approve or reject each gate with a reason on record and a permanent, exportable audit trail.",
   },
   {
     icon: Users,
-    title: "Multi-Party Collaboration",
-    desc: "Suppliers, buyers, brokers, and compliance officers — all working in one audited deal room.",
+    role: "Escrow & legal",
+    body: "Read-only access scoped to the documents relevant to the release you are asked to authorise.",
+  },
+];
+
+const trustPoints = [
+  { icon: KeyRound, title: "AES-256 at rest", body: "Per-document keys, rotated per deal room." },
+  { icon: ServerCog, title: "Regional residency", body: "UAE and EU data regions with no cross-copy." },
+  { icon: Clock3, title: "Immutable timeline", body: "Append-only log, each entry hashed to the last." },
+  { icon: FileCheck2, title: "Regulator export", body: "Full deal dossier as a signed PDF bundle." },
+];
+
+const faqs = [
+  {
+    q: "Who can see my documents?",
+    a: "Only the parties you explicitly admit to a deal room, scoped per document. Compliance officers see evidence for the gate they are reviewing — never your commercial margin.",
   },
   {
-    icon: Globe,
-    title: "AfCFTA Compliant",
-    desc: "Built for the African Continental Free Trade Area with per-country compliance profiles and KYB onboarding.",
+    q: "Can a stage be skipped?",
+    a: "No. The pipeline is linear by design. A stage only unlocks when the required evidence is on file and an authorised officer signs the gate.",
+  },
+  {
+    q: "What is a UTID?",
+    a: "A Unique Transaction ID generated at settlement. It hashes the full document and approval chain, so the deal can be independently verified years later.",
+  },
+  {
+    q: "How long does onboarding take?",
+    a: "Most corporate entities complete KYC in under 48 hours. Higher-risk jurisdictions require enhanced due diligence and additional review.",
   },
 ];
 
-const STAGES = [
-  { num: "01", label: "Registration", color: "#3b82f6" },
-  { num: "02", label: "Supplier Verification", color: "#6366f1" },
-  { num: "03", label: "Buyer Onboarding", color: "#8b5cf6" },
-  { num: "04", label: "SPA Signature", color: "#D4AF37" },
-  { num: "05", label: "Proof of Funds", color: "#f59e0b" },
-  { num: "06", label: "Advance Payment", color: "#f97316" },
-  { num: "07", label: "Origin Logistics", color: "#06b6d4" },
-  { num: "08", label: "Shipping", color: "#14b8a6" },
-  { num: "09", label: "Destination Clearance", color: "#10b981" },
-  { num: "10", label: "Settlement", color: "#22c55e" },
-];
-
-const TRUST_ITEMS = [
-  { icon: ShieldCheck, label: "ISO 27001" },
-  { icon: Lock, label: "FATF Aligned" },
-  { icon: CheckCircle2, label: "SOC 2 Type II" },
-  { icon: Globe, label: "GDPR Compliant" },
-];
+function Eyebrow({ children }: { children: string }) {
+  return (
+    <span className="inline-flex items-center gap-3 text-xs uppercase tracking-[0.22em] text-gold">
+      <span className="h-px w-8 bg-gold/50" />
+      {children}
+    </span>
+  );
+}
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-dark-950 text-white selection:bg-gold-500 selection:text-dark-950 font-sans relative overflow-hidden">
-      {/* Ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gold-500/[0.07] blur-[150px] rounded-full pointer-events-none" />
-
-      {/* ── Nav ─────────────────────────────────────── */}
-      <nav className="relative z-50">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-8 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center shadow-md shadow-gold-500/20 group-hover:shadow-gold-500/30 transition-shadow">
-              <Diamond size={18} className="text-dark-950" strokeWidth={2} />
-            </div>
-            <span className="text-xl font-bold tracking-tight">
-              Shaqal <span className="text-gradient-gold">TradeOS</span>
-            </span>
-          </Link>
-
-          <div className="hidden md:flex items-center gap-8 text-[14px] font-medium text-gray-muted">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#pipeline" className="hover:text-white transition-colors">Pipeline</a>
-            <a href="#trust" className="hover:text-white transition-colors">Trust</a>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="px-5 py-2.5 rounded-xl text-[14px] font-medium text-gray-muted hover:text-white transition-colors">
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
+          <Brand />
+          <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
+            <a href="#platform" className="transition-colors hover:text-gold">
+              Platform
+            </a>
+            <a href="#pipeline" className="transition-colors hover:text-gold">
+              Pipeline
+            </a>
+            <a href="#roles" className="transition-colors hover:text-gold">
+              Who it&apos;s for
+            </a>
+            <a href="#trust" className="transition-colors hover:text-gold">
+              Trust
+            </a>
+          </nav>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href="/login"
+              className="hidden items-center rounded-xl border border-border bg-secondary/60 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-gold/50 hover:text-gold-bright sm:inline-flex"
+            >
               Sign in
             </Link>
-            <Link href="/register" className="button-gold px-5 py-2.5 rounded-xl text-[14px] font-semibold flex items-center gap-2">
-              Get Started <ArrowRight size={15} strokeWidth={2.5} />
+            <Link
+              href="/register"
+              className="gold-glow inline-flex items-center gap-2 rounded-xl bg-gradient-to-b from-gold-bright to-gold px-4 py-2 text-sm font-semibold text-primary-foreground"
+            >
+              Get started
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* ── Hero ────────────────────────────────────── */}
-      <section className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-8 pt-16 md:pt-24 pb-20 md:pb-32">
-        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-12 lg:gap-16 items-center">
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-gold-500/25 bg-gold-500/[0.04] text-gold-500 text-[11px] font-semibold tracking-widest uppercase">
-              <ShieldCheck size={14} strokeWidth={2.5} /> ISO 27001 · FATF AlIGNED
+      <main>
+        <section className="relative overflow-hidden border-b border-border">
+          <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-gold/10 blur-[140px]" />
+          <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-2 lg:items-center">
+            <div className="min-w-0">
+              <span className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs uppercase tracking-wider text-gold">
+                <ShieldCheck className="h-3.5 w-3.5" /> ISO 27001 · FATF aligned
+              </span>
+              <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
+                Move gold, minerals and trust through one{" "}
+                <span className="text-gold">audited pipeline</span>.
+              </h1>
+              <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
+                Shaqal TradeOS replaces scattered WhatsApp threads and PDF chains with a single
+                compliance-gated deal room — built for brokers, buyers, mandates and compliance
+                officers working high-value commodity transactions.
+              </p>
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/register"
+                  className="gold-glow inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-gold-bright to-gold px-5 py-3 text-sm font-semibold text-primary-foreground"
+                >
+                  Request platform access
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary/60 px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/50 hover:text-gold-bright"
+                >
+                  Explore a live deal room
+                </Link>
+              </div>
+              <dl className="tnum mt-12 grid grid-cols-2 gap-6 sm:grid-cols-4">
+                {stats.map((s) => (
+                  <div key={s.label}>
+                    <dt className="font-display text-2xl font-semibold text-gold">{s.value}</dt>
+                    <dd className="mt-1 text-xs text-muted-foreground">{s.label}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
 
-            <h1 className="text-5xl md:text-[72px] font-bold tracking-tight leading-[1.05]">
-              Move gold, minerals
-              <br />
-              and trust through
-              <br />
-              one <span className="text-gradient-gold">audited</span>
-              <br />
-              <span className="text-gradient-gold">pipeline.</span>
-            </h1>
-
-            <p className="text-[16px] text-gray-muted max-w-[520px] leading-relaxed">
-              Shaqal TradeOS replaces scattered WhatsApp threads and PDF chains with a single compliance-gated deal room — built for brokers, buyers, and compliance officers working high-value commodity transactions.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Link href="/register" className="button-gold px-7 py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2.5 text-[15px] shadow-lg shadow-gold-500/20">
-                Request platform access <ArrowRight size={17} strokeWidth={2.5} />
-              </Link>
-              <a href="#features" className="px-7 py-3.5 rounded-xl font-medium flex items-center justify-center gap-2 text-[15px] border border-white/10 hover:bg-white/[0.03] transition-colors">
-                Explore features
-              </a>
+            <div className="relative">
+              <div className="overflow-hidden rounded-3xl border border-gold/20 shadow-2xl shadow-black/60">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/hero.jpg"
+                  alt="Gold bullion bars and raw mineral ore under dramatic lighting"
+                  width={1600}
+                  height={1104}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <Card className="absolute -bottom-6 left-4 right-4 sm:left-8 sm:right-auto sm:w-72">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Deal SQ-1042 · Stage 8
+                </p>
+                <p className="mt-2 text-sm text-foreground">
+                  Assay verified · Escrow funded · Awaiting compliance release
+                </p>
+                <p className="tnum mt-3 text-xs text-gold">UTID 0x8f31…c47a</p>
+              </Card>
             </div>
           </div>
+        </section>
 
-          {/* Hero visual */}
-          <div className="relative">
-            <div className="relative rounded-2xl overflow-hidden border border-white/5 bg-dark-900 aspect-[4/3] w-full shadow-2xl shadow-black/40">
+        <section className="border-b border-border bg-sidebar/30">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-10 gap-y-4 px-5 py-6 text-xs uppercase tracking-[0.18em] text-muted-foreground sm:px-8">
+            <span className="text-gold/70">Trusted evidence standards</span>
+            <span>SGS</span>
+            <span>Alex Stewart</span>
+            <span>DMCC</span>
+            <span>LBMA chain of custody</span>
+            <span>Basel III KYC</span>
+          </div>
+        </section>
+
+        <section id="platform" className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+          <Eyebrow>Platform</Eyebrow>
+          <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            Built for the parts of a trade that go wrong
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Documentation gaps, unverifiable mandates and unclear commission splits kill deals.
+            TradeOS makes each of them a structured, reviewable step.
+          </p>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((f) => (
+              <Card
+                key={f.title}
+                className="group transition-colors duration-300 hover:border-gold/40"
+              >
+                <span className="grid h-10 w-10 place-items-center rounded-xl border border-gold/30 bg-gold/10 transition-colors group-hover:bg-gold/20">
+                  <f.icon className="h-4.5 w-4.5 text-gold" />
+                </span>
+                <h3 className="mt-4 text-base font-semibold text-foreground">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section id="pipeline" className="border-y border-border bg-sidebar/40">
+          <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+            <Eyebrow>Pipeline</Eyebrow>
+            <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+              Ten stages. One direction.
+            </h2>
+            <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
+              Deals only move forward when the evidence for the current stage is on file.
+            </p>
+            <ol className="mt-12 grid gap-x-10 gap-y-0 sm:grid-cols-2">
+              {stages.map((stage, i) => (
+                <li key={stage.name} className="group relative flex gap-5 pb-8">
+                  <div className="flex flex-col items-center">
+                    <span className="tnum grid h-9 w-9 shrink-0 place-items-center rounded-full border border-gold/35 bg-background text-xs font-semibold text-gold transition-colors group-hover:border-gold group-hover:bg-gold/15">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="mt-2 w-px flex-1 bg-border" />
+                  </div>
+                  <div className="min-w-0 pt-1.5">
+                    <p className="text-sm font-medium text-foreground">{stage.name}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      {stage.note}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section id="roles" className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+          <Eyebrow>Who it&apos;s for</Eyebrow>
+          <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            One room, four vantage points
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            Every participant sees exactly what their role requires — and nothing that would
+            compromise the deal.
+          </p>
+          <div className="mt-12 grid gap-5 sm:grid-cols-2">
+            {roles.map((r) => (
+              <Card key={r.role} className="flex gap-4 p-6">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-gold/25 bg-gold/10">
+                  <r.icon className="h-5 w-5 text-gold" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="text-base font-semibold text-foreground">{r.role}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{r.body}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-y border-border bg-sidebar/30">
+          <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:px-8 sm:py-24 lg:grid-cols-2 lg:items-center">
+            <div className="overflow-hidden rounded-3xl border border-gold/20 shadow-2xl shadow-black/60">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="hero.jpg"
-                alt="Gold Bars Validation"
-                className="w-full h-full object-cover opacity-90"
+                src="/hero.jpg"
+                alt="Sealed trade documents beside a gold bar on dark stone"
+                width={1280}
+                height={960}
+                loading="lazy"
+                className="h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/20 to-transparent" />
             </div>
-
-            {/* Floating card */}
-            <div className="absolute -bottom-6 -left-6 bg-dark-900/95 backdrop-blur-xl border border-white/5 p-5 rounded-2xl shadow-2xl w-[360px]">
-              <div className="flex items-center gap-2 mb-2.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <p className="text-[10px] text-gray-muted font-semibold uppercase tracking-widest">Live deal · Stage 8</p>
-              </div>
-              <p className="font-semibold text-[15px] leading-snug mb-2">Assay verified · Escrow funded · Awaiting compliance release</p>
-              <p className="text-gold-500 text-[12px] font-mono tracking-tight">UTID 0x8f31...c47a</p>
+            <div className="min-w-0">
+              <Eyebrow>The vault</Eyebrow>
+              <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+                Paperwork that can defend itself
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                Every file uploaded to a deal room is fingerprinted, versioned and bound to the
+                stage it was submitted for. If a document changes, the chain shows it.
+              </p>
+              <ul className="mt-8 space-y-3">
+                {[
+                  "SHA-256 fingerprint on every upload, visible to all admitted parties",
+                  "Version history with the operator identity behind each change",
+                  "Per-document access scoping — buyers never see broker margin",
+                  "One-click regulator dossier covering the full ten-stage history",
+                ].map((point) => (
+                  <li key={point} className="flex gap-3 text-sm text-muted-foreground">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+                    <span className="leading-relaxed">{point}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Features ─────────────────────────────────── */}
-      <section id="features" className="relative z-10 py-20 md:py-28">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-8">
-          <div className="text-center mb-16">
-            <p className="text-gold-500 text-[11px] font-semibold tracking-widest uppercase mb-3">Platform</p>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Built for trust</h2>
-            <p className="text-gray-muted text-[15px] max-w-xl mx-auto">Enterprise-grade security and compliance features designed for high-value commodity transactions.</p>
-          </div>
+        <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+          <Card className="relative overflow-hidden p-8 sm:p-12">
+            <Quote className="absolute -right-4 -top-4 h-28 w-28 text-gold/5" />
+            <blockquote className="relative max-w-3xl font-display text-xl leading-relaxed text-foreground sm:text-2xl">
+              &ldquo;We used to lose three weeks per transaction reconciling assay reports and
+              mandate letters across five inboxes. On TradeOS the evidence is either in the room or
+              the stage doesn&apos;t open.&rdquo;
+            </blockquote>
+            <figcaption className="relative mt-6 text-sm text-muted-foreground">
+              <span className="font-medium text-gold">Head of Trade Compliance</span> · precious
+              metals desk, Dubai
+            </figcaption>
+          </Card>
+        </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="glass-panel rounded-2xl p-6 card-hover border-glow group">
-                <div className="w-11 h-11 rounded-xl bg-gold-500/10 flex items-center justify-center mb-4 group-hover:bg-gold-500/15 transition-colors">
-                  <f.icon size={20} className="text-gold-500" strokeWidth={1.5} />
-                </div>
-                <h3 className="font-semibold text-[15px] mb-2">{f.title}</h3>
-                <p className="text-[13px] text-gray-muted leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Pipeline ─────────────────────────────────── */}
-      <section id="pipeline" className="relative z-10 py-20 md:py-28 bg-dark-900/30">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-8">
-          <div className="text-center mb-16">
-            <p className="text-gold-500 text-[11px] font-semibold tracking-widest uppercase mb-3">Pipeline</p>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">10 stages. Zero shortcuts.</h2>
-            <p className="text-gray-muted text-[15px] max-w-xl mx-auto">Every deal passes through a compliance-gated pipeline. No stage can be skipped — documents must be verified before advancing.</p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {STAGES.map((s) => (
-              <div key={s.num} className="glass-panel rounded-xl p-4 text-center card-hover border-glow group">
-                <div
-                  className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center text-white font-bold text-sm transition-transform group-hover:scale-110"
-                  style={{ background: `${s.color}20`, color: s.color }}
-                >
-                  {s.num}
-                </div>
-                <p className="text-[12px] font-medium leading-snug">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Trust ────────────────────────────────────── */}
-      <section id="trust" className="relative z-10 py-20 md:py-28">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-8">
-          <div className="glass-panel-elevated rounded-3xl p-8 md:p-12 text-center">
-            <div className="flex items-center justify-center gap-6 mb-8 flex-wrap">
-              {TRUST_ITEMS.map((t) => (
-                <div key={t.label} className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/5 bg-white/[0.02]">
-                  <t.icon size={16} className="text-gold-500" />
-                  <span className="text-[13px] font-medium">{t.label}</span>
-                </div>
+        <section id="trust" className="border-y border-border bg-sidebar/40">
+          <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+            <Eyebrow>Trust</Eyebrow>
+            <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+              Every action is evidence
+            </h2>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Immutable, hash-chained audit logs mean any regulator, bank or counterparty can
+              reconstruct the full history of a transaction in minutes — not weeks.
+            </p>
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {trustPoints.map((t) => (
+                <Card key={t.title} className="p-6">
+                  <t.icon className="h-5 w-5 text-gold" />
+                  <h3 className="mt-4 text-sm font-semibold text-foreground">{t.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t.body}</p>
+                </Card>
               ))}
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Enterprise-grade security</h2>
-            <p className="text-gray-muted text-[15px] max-w-xl mx-auto mb-8">
-              Built with defense-in-depth: encrypted storage, role-based access, idempotent APIs, rate limiting, and full audit logging.
-            </p>
-            <Link href="/register" className="button-gold px-7 py-3.5 rounded-xl font-semibold inline-flex items-center gap-2.5 text-[15px] shadow-lg shadow-gold-500/20">
-              Start building trust <ArrowRight size={17} strokeWidth={2.5} />
-            </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Footer ───────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/[0.04] py-12">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center shadow-sm shadow-gold-500/20">
-                <Diamond size={16} className="text-dark-950" strokeWidth={2} />
+        <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-24">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+            <div>
+              <Eyebrow>Questions</Eyebrow>
+              <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+                Before you open a room
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                The details counterparties ask about most often.
+              </p>
+            </div>
+            <dl className="divide-y divide-border border-y border-border">
+              {faqs.map((f) => (
+                <div key={f.q} className="py-6">
+                  <dt className="text-sm font-semibold text-foreground">{f.q}</dt>
+                  <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.a}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
+          <Card className="relative overflow-hidden p-8 text-center sm:p-14">
+            <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/15 blur-[120px]" />
+            <div className="relative">
+              <FileCheck2 className="mx-auto h-6 w-6 text-gold" />
+              <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+                Bring your next mandate into the light
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                Onboarding is invitation-based. Submit your entity for KYC review and we&apos;ll
+                open a sandbox deal room within 48 hours.
+              </p>
+              <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+                <Link
+                  href="/register"
+                  className="gold-glow inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-gold-bright to-gold px-6 py-3 text-sm font-semibold text-primary-foreground"
+                >
+                  Request platform access
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/dashboard/kyc"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary/60 px-6 py-3 text-sm font-medium text-foreground transition-colors hover:border-gold/50 hover:text-gold-bright"
+                >
+                  Start KYC onboarding
+                </Link>
               </div>
-              <span className="text-[15px] font-bold tracking-tight">
-                Shaqal <span className="text-gradient-gold">TradeOS</span>
-              </span>
             </div>
-            <p className="text-[13px] text-gray-muted">
-              &copy; {new Date().getFullYear()} Shaqal Ltd. All rights reserved.
+          </Card>
+        </section>
+      </main>
+
+      <footer className="border-t border-border bg-sidebar/30">
+        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
+          <div className="min-w-0">
+            <Brand />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
+              Audited deal infrastructure for gold, minerals and high-value physical commodity
+              trade.
             </p>
-            <div className="flex items-center gap-6 text-[13px] text-gray-muted">
-              <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
-              <a href="/terms" className="hover:text-white transition-colors">Terms</a>
-              <a href="#" className="hover:text-white transition-colors">Security</a>
+          </div>
+          {[
+            { title: "Platform", items: ["Deal rooms", "Document vault", "Commission engine", "Audit log"] },
+            { title: "Compliance", items: ["KYC & screening", "Sanctions policy", "Data residency", "Security"] },
+            { title: "Company", items: ["About Shaqal", "Contact desk", "Terms", "Privacy"] },
+          ].map((col) => (
+            <div key={col.title}>
+              <p className="text-xs uppercase tracking-[0.18em] text-gold">{col.title}</p>
+              <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+                {col.items.map((item) => (
+                  <li key={item} className="transition-colors hover:text-foreground">
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
+          ))}
+        </div>
+        <div className="border-t border-border">
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <p className="tnum">© 2026 Shaqal Metals FZE · ISO 27001 · FATF aligned</p>
+            <p>Dubai · Accra · Geneva</p>
           </div>
         </div>
       </footer>

@@ -18,12 +18,12 @@ const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
 ];
 
 const ROLE_BADGES: Record<string, string> = {
-  ADMIN: "bg-red-500/10 text-red-400 border-red-500/20",
-  BUYER: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  SUPPLIER: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  BROKER: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  FACILITATOR: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  FINANCIER: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+  ADMIN: "bg-danger/10 text-danger border-danger/40",
+  BUYER: "bg-chart-2/10 text-chart-2 border-chart-2/40",
+  SUPPLIER: "bg-success/10 text-success border-success/40",
+  BROKER: "bg-chart-1/10 text-chart-1 border-chart-1/40",
+  FACILITATOR: "bg-chart-4/10 text-chart-4 border-chart-4/40",
+  FINANCIER: "bg-secondary/60 text-muted-foreground border-border",
   COMPLIANCE_OFFICER: "bg-gold-500/10 text-gold-500 border-gold-500/20",
 };
 
@@ -79,18 +79,17 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 lg:p-10 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-500 to-gold-600 flex items-center justify-center shadow-md shadow-gold-500/20">
           <Shield size={20} className="text-dark-950" />
         </div>
         <div>
-          <h1 className="text-xl font-bold">Operations Panel</h1>
           <p className="text-[13px] text-gray-muted">Internal system management for Shaqal staff</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1 p-1 glass-panel rounded-2xl w-fit">
+      <div className="flex flex-wrap items-center gap-1 p-1 glass-panel rounded-2xl w-fit max-w-full">
         {TABS.map(t => {
           const Icon = t.icon;
           return (
@@ -108,10 +107,10 @@ export default function UsersPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: "Total Users", value: stats.totalUsers, icon: Users, bg: "bg-blue-500/10", fg: "text-blue-400" },
-              { label: "Active Users", value: stats.activeUsers, icon: UserCheck, bg: "bg-emerald-500/10", fg: "text-emerald-400" },
+              { label: "Total Users", value: stats.totalUsers, icon: Users, bg: "bg-chart-2/10", fg: "text-chart-2" },
+              { label: "Active Users", value: stats.activeUsers, icon: UserCheck, bg: "bg-success/10", fg: "text-success" },
               { label: "Verified", value: stats.verifiedUsers, icon: CheckCircle2, bg: "bg-gold-500/10", fg: "text-gold-500" },
-              { label: "Total Deals", value: stats.totalDeals, icon: FileText, bg: "bg-purple-500/10", fg: "text-purple-400" },
+              { label: "Total Deals", value: stats.totalDeals, icon: FileText, bg: "bg-chart-1/10", fg: "text-chart-1" },
             ].map(s => (
               <div key={s.label} className="glass-panel rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
@@ -156,11 +155,11 @@ export default function UsersPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="glass-panel rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-2"><TrendingUp size={16} className="text-emerald-400" /><p className="text-[12px] text-gray-muted font-medium">New Users (30d)</p></div>
+              <div className="flex items-center gap-2 mb-2"><TrendingUp size={16} className="text-success" /><p className="text-[12px] text-gray-muted font-medium">New Users (30d)</p></div>
               <p className="text-2xl font-bold">{stats.recentUsers}</p>
             </div>
             <div className="glass-panel rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-2"><FileText size={16} className="text-blue-400" /><p className="text-[12px] text-gray-muted font-medium">New Deals (30d)</p></div>
+              <div className="flex items-center gap-2 mb-2"><FileText size={16} className="text-chart-2" /><p className="text-[12px] text-gray-muted font-medium">New Deals (30d)</p></div>
               <p className="text-2xl font-bold">{stats.recentDeals}</p>
             </div>
           </div>
@@ -183,8 +182,8 @@ export default function UsersPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-[13px] font-semibold truncate">{user.fullName}</p>
-                    {!user.active && <span className="text-[9px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full font-semibold">INACTIVE</span>}
-                    {user.emailVerified && <CheckCircle2 size={12} className="text-emerald-400 shrink-0" />}
+                    {!user.active && <span className="text-[9px] text-danger bg-danger/10 px-1.5 py-0.5 rounded-full font-semibold">INACTIVE</span>}
+                    {user.emailVerified && <CheckCircle2 size={12} className="text-success shrink-0" />}
                   </div>
                   <p className="text-[11px] text-gray-muted truncate">{user.email}</p>
                 </div>
@@ -192,8 +191,8 @@ export default function UsersPage() {
                 <p className="text-[11px] text-gray-muted hidden md:block">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : ""}</p>
                 <div className="flex items-center gap-1">
                   {actionLoading === user.id ? <Loader2 size={14} className="text-gold-500 animate-spin" />
-                    : user.active ? <button onClick={() => handleDeactivate(user.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-400 transition" title="Deactivate"><UserX size={14} /></button>
-                    : <button onClick={() => handleReactivate(user.id)} className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-emerald-400 transition" title="Reactivate"><UserCheck size={14} /></button>}
+                    : user.active ? <button onClick={() => handleDeactivate(user.id)} className="p-1.5 rounded-lg hover:bg-danger/10 text-danger transition" title="Deactivate"><UserX size={14} /></button>
+                    : <button onClick={() => handleReactivate(user.id)} className="p-1.5 rounded-lg hover:bg-success/10 text-success transition" title="Reactivate"><UserCheck size={14} /></button>}
                 </div>
               </div>
             ))}
@@ -224,10 +223,10 @@ export default function UsersPage() {
         <div className="space-y-6">
           <div className="glass-panel rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center"><Server size={20} className="text-emerald-400" /></div>
+              <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center"><Server size={20} className="text-success" /></div>
               <div>
                 <h3 className="text-[14px] font-semibold">System Status</h3>
-                <p className="text-[12px] text-emerald-400 flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> All Systems Operational</p>
+                <p className="text-[12px] text-success flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-success animate-pulse" /> All Systems Operational</p>
               </div>
             </div>
           </div>
@@ -235,7 +234,7 @@ export default function UsersPage() {
             <div className="glass-panel rounded-2xl p-6">
               <h3 className="text-[14px] font-semibold mb-4 flex items-center gap-2"><Database size={16} className="text-gold-500" /> Database</h3>
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-dark-800/50 rounded-xl p-4"><p className="text-[11px] text-gray-muted mb-1">Status</p><p className="text-[13px] font-semibold text-emerald-400">{health.database.status}</p></div>
+                <div className="bg-dark-800/50 rounded-xl p-4"><p className="text-[11px] text-gray-muted mb-1">Status</p><p className="text-[13px] font-semibold text-success">{health.database.status}</p></div>
                 <div className="bg-dark-800/50 rounded-xl p-4"><p className="text-[11px] text-gray-muted mb-1">Type</p><p className="text-[13px] font-semibold">{health.database.type}</p></div>
                 <div className="bg-dark-800/50 rounded-xl p-4"><p className="text-[11px] text-gray-muted mb-1">Size</p><p className="text-[13px] font-semibold">{health.database.sizeBytes ? (health.database.sizeBytes / 1024 / 1024).toFixed(1) + " MB" : "N/A"}</p></div>
               </div>

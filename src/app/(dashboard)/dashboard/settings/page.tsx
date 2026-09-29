@@ -44,10 +44,7 @@ export default function SettingsPage() {
   return (
     <div className="p-4 md:p-8 lg:p-10 space-y-8 animate-fade-in-up max-w-3xl">
       {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold tracking-tight">Settings</h1>
-        <p className="text-gray-muted mt-2 text-[15px]">Manage your account preferences and security.</p>
-      </div>
+      <p className="max-w-2xl text-sm text-muted-foreground">Manage your account preferences and security.</p>
 
       {/* Account Card */}
       <div className="glass-panel-elevated rounded-2xl p-6 card-hover">
@@ -77,8 +74,8 @@ export default function SettingsPage() {
         <h3 className="text-xs font-semibold text-gray-muted uppercase tracking-wider mb-3">Profile</h3>
         <div className="glass-panel rounded-2xl divide-y divide-white/[0.03] overflow-hidden">
           <Link href="/dashboard/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition group">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
-              <User size={18} className="text-blue-400" />
+            <div className="w-10 h-10 rounded-xl bg-chart-2/10 flex items-center justify-center shrink-0">
+              <User size={18} className="text-chart-2" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium group-hover:text-gold-500 transition">Edit profile</p>
@@ -87,8 +84,8 @@ export default function SettingsPage() {
             <ChevronRight size={16} className="text-dark-600 group-hover:text-gold-500 transition shrink-0" />
           </Link>
           <Link href="/dashboard/profile" className="flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition group">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <Mail size={18} className="text-emerald-400" />
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+              <Mail size={18} className="text-success" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium group-hover:text-gold-500 transition">Email address</p>
@@ -121,8 +118,8 @@ export default function SettingsPage() {
             <div className="p-6 space-y-4">
               {passwordSent ? (
                 <div className="text-center py-4">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle size={28} className="text-emerald-400" />
+                  <div className="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle size={28} className="text-success" />
                   </div>
                   <h4 className="text-lg font-bold mb-1">Check your email</h4>
                   <p className="text-sm text-gray-muted mb-4">
@@ -154,8 +151,8 @@ export default function SettingsPage() {
                   </div>
 
                   {error && (
-                    <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-                      <p className="text-red-400 text-xs">{error}</p>
+                    <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-xl p-3">
+                      <p className="text-danger text-xs">{error}</p>
                     </div>
                   )}
 
@@ -182,17 +179,17 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <div>
-        <h3 className="text-xs font-semibold text-red-400/50 uppercase tracking-wider mb-3">Danger Zone</h3>
-        <div className="border border-red-500/15 rounded-2xl overflow-hidden bg-red-500/[0.02]">
+        <h3 className="text-xs font-semibold text-danger/50 uppercase tracking-wider mb-3">Danger Zone</h3>
+        <div className="border border-danger/40 rounded-2xl overflow-hidden bg-danger/[0.02]">
           <button
             onClick={logout}
-            className="flex items-center gap-4 px-6 py-4 hover:bg-red-500/[0.04] transition w-full text-left group"
+            className="flex items-center gap-4 px-6 py-4 hover:bg-danger/[0.04] transition w-full text-left group"
           >
-            <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
-              <LogOut size={18} className="text-red-400" />
+            <div className="w-10 h-10 rounded-xl bg-danger/10 flex items-center justify-center shrink-0">
+              <LogOut size={18} className="text-danger" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-red-400">Sign out</p>
+              <p className="text-sm font-medium text-danger">Sign out</p>
               <p className="text-xs text-gray-muted">End your current session on this device</p>
             </div>
           </button>

@@ -7,10 +7,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Upload, FileCheck, Clock, CheckCircle2, XCircle, AlertCircle, Loader2, X, File, Trash2, Shield } from "lucide-react";
 
 const STATUS_CONFIG: Record<string, { color: string; bg: string; border: string; label: string; icon: React.ElementType }> = {
-  PENDING: { color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", label: "Pending Review", icon: Clock },
-  APPROVED: { color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", label: "Approved", icon: CheckCircle2 },
-  REJECTED: { color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", label: "Rejected", icon: XCircle },
-  REQUEST_INFO: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", label: "Info Requested", icon: AlertCircle },
+  PENDING: { color: "text-gold-bright", bg: "bg-gold/10", border: "border-gold/40", label: "Pending Review", icon: Clock },
+  APPROVED: { color: "text-success", bg: "bg-success/10", border: "border-success/40", label: "Approved", icon: CheckCircle2 },
+  REJECTED: { color: "text-danger", bg: "bg-danger/10", border: "border-danger/40", label: "Rejected", icon: XCircle },
+  REQUEST_INFO: { color: "text-gold", bg: "bg-gold/10", border: "border-gold/30", label: "Info Requested", icon: AlertCircle },
 };
 
 export default function KycPage() {
@@ -67,18 +67,15 @@ export default function KycPage() {
 
   return (
     <div className="p-4 md:p-8 lg:p-10 space-y-8 animate-fade-in-up">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight">KYC / Verification</h1>
-          <p className="text-gray-muted mt-2 text-[15px]">Submit identity documents and track verification status.</p>
-        </div>
-        <button onClick={() => setShowSubmit(!showSubmit)} className="button-gold px-6 py-3 rounded-xl flex items-center gap-2.5 text-sm font-semibold">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <p className="max-w-xl text-sm text-muted-foreground">Submit identity documents and track verification status. Every submission is written to the immutable audit ledger.</p>
+        <button onClick={() => setShowSubmit(!showSubmit)} className="button-gold shrink-0 px-6 py-3 rounded-xl flex items-center gap-2.5 text-sm font-semibold">
           <Upload size={16} /> Submit Documents
         </button>
       </div>
 
-      {error && <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4"><AlertCircle size={18} className="text-red-400 shrink-0" /><p className="text-red-400 text-sm">{error}</p></div>}
-      {success && <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /><p className="text-emerald-400 text-sm">{success}</p></div>}
+      {error && <div className="flex items-center gap-3 bg-danger/10 border border-danger/40 rounded-xl p-4"><AlertCircle size={18} className="text-danger shrink-0" /><p className="text-danger text-sm">{error}</p></div>}
+      {success && <div className="flex items-center gap-3 bg-success/10 border border-success/40 rounded-xl p-4"><CheckCircle2 size={18} className="text-success shrink-0" /><p className="text-success text-sm">{success}</p></div>}
 
       {showSubmit && (
         <div className="glass-panel-elevated rounded-2xl p-6 space-y-5">
@@ -126,7 +123,7 @@ export default function KycPage() {
                     <option value="BANK_STATEMENT">Bank Statement</option>
                     <option value="OTHER">Other</option>
                   </select>
-                  <button onClick={() => removeFile(i)} className="text-gray-muted hover:text-red-400 transition p-1"><Trash2 size={14} /></button>
+                  <button onClick={() => removeFile(i)} className="text-gray-muted hover:text-danger transition p-1"><Trash2 size={14} /></button>
                 </div>
               ))}
             </div>
@@ -143,7 +140,7 @@ export default function KycPage() {
 
       {!loading && submissions.length === 0 && (
         <div className="glass-panel-elevated rounded-2xl p-12 text-center">
-          <Shield size={40} className="text-dark-600 mx-auto mb-4" />
+          <Shield size={40} className="text-muted-foreground/60 mx-auto mb-4" />
           <h3 className="text-xl font-semibold mb-2">No submissions yet</h3>
           <p className="text-gray-muted text-sm">Submit your KYC documents to get verified on the platform.</p>
         </div>

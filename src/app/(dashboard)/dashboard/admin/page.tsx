@@ -6,13 +6,13 @@ import { api } from "@/lib/api";
 import { Users, ArrowLeft, Search, UserCheck, UserX, Loader2 } from "lucide-react";
 
 const ROLE_COLORS: Record<string, string> = {
-  supplier: "bg-emerald-500/10 text-emerald-400",
-  buyer: "bg-blue-500/10 text-blue-400",
-  broker: "bg-purple-500/10 text-purple-400",
-  facilitator: "bg-orange-500/10 text-orange-400",
+  supplier: "bg-success/10 text-success",
+  buyer: "bg-chart-2/10 text-chart-2",
+  broker: "bg-chart-1/10 text-chart-1",
+  facilitator: "bg-chart-4/10 text-chart-4",
   compliance_officer: "bg-gold-500/10 text-gold-500",
-  admin: "bg-red-500/10 text-red-400",
-  financier: "bg-cyan-500/10 text-cyan-400",
+  admin: "bg-danger/10 text-danger",
+  financier: "bg-secondary/60 text-muted-foreground",
 };
 
 export default function AdminPage() {
@@ -57,15 +57,12 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 lg:p-10 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <Link href="/dashboard" className="p-2 rounded-xl hover:bg-white/[0.04] text-gray-muted hover:text-white transition">
           <ArrowLeft size={18} />
         </Link>
-        <div>
-          <h1 className="text-xl font-bold">Admin Panel</h1>
-          <p className="text-[13px] text-gray-muted">Manage users, roles, and verification status</p>
-        </div>
+        <p className="text-[13px] text-muted-foreground">Manage users, roles, and verification status</p>
       </div>
 
       <form onSubmit={handleSearch} className="glass-panel rounded-2xl p-4 flex items-center gap-3">
@@ -108,7 +105,7 @@ export default function AdminPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-[13px] font-semibold truncate">{user.fullName}</p>
-                  {!user.active && <span className="text-[10px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded-full">Inactive</span>}
+                  {!user.active && <span className="text-[10px] text-danger bg-danger/10 px-1.5 py-0.5 rounded-full">Inactive</span>}
                 </div>
                 <p className="text-[11px] text-gray-muted truncate">{user.email}</p>
               </div>
@@ -119,9 +116,9 @@ export default function AdminPage() {
                 {actionLoading === user.id ? (
                   <Loader2 size={16} className="text-gold-500 animate-spin" />
                 ) : user.active ? (
-                  <button onClick={() => handleDeactivate(user.id)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 transition" title="Deactivate"><UserX size={16} /></button>
+                  <button onClick={() => handleDeactivate(user.id)} className="p-2 rounded-lg hover:bg-danger/10 text-danger transition" title="Deactivate"><UserX size={16} /></button>
                 ) : (
-                  <button onClick={() => handleReactivate(user.id)} className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-400 transition" title="Reactivate"><UserCheck size={16} /></button>
+                  <button onClick={() => handleReactivate(user.id)} className="p-2 rounded-lg hover:bg-success/10 text-success transition" title="Reactivate"><UserCheck size={16} /></button>
                 )}
               </div>
             </div>
