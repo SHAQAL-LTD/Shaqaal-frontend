@@ -73,13 +73,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    // Admin sign-out returns to the operations console, everyone else to the platform login.
+    const isAdmin = user?.role === "admin";
     // 1. Immediately null the user in React state so no component can use stale data
     setUser(null);
     // 2. Clear ALL browser storage
     nuclearLogout();
     // 3. Hard redirect — guarantees a full page reload, no stale state survives
-    window.location.replace("/login");
-  }, []);
+    window.location.replace(isAdmin ? "/users" : "/login");
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>

@@ -467,14 +467,28 @@
 }
 
 /* ─── Page Transitions ─────────────────────────────── */
+/* No `forwards` fill on the .animate-* helpers: each keyframe `to` state
+   equals the default styles, and a lingering fill would pin
+   `transform: translateY(0)` on the element forever — making it the
+   containing block for `position: fixed` descendants and breaking
+   full-screen modals (they would size to the page container, not the
+   viewport). `.stagger-in > *` legitimately keeps `forwards` because its
+   base state is opacity:0. */
 .animate-fade-in-up {
-  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-slide-down {
-  animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth jumps for the legal pages' anchor-link table of contents. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }

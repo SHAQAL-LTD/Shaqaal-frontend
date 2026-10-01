@@ -6,16 +6,35 @@ import type { ReactNode } from "react";
 /**
  * Brand mark — shared by landing, auth pages and the dashboard shell.
  * DESIGN.md §3 (app-shell.tsx).
+ *
+ * `href={null}` renders a NON-interactive mark: inside the dashboard shell the
+ * logo must never navigate away (signing out happens only via the account
+ * menu's Sign Out), so the shell passes `href={null}`.
+ *
+ * `short` drops the TradeOS wordmark — the landing page presents the brand as
+ * "Shaqal" only.
  */
-export function Brand({ href = "/", className }: { href?: string; className?: string }) {
-  return (
-    <Link href={href} className={cn("flex items-center gap-2.5", className)}>
+export function Brand({ href = "/", className, short = false }: { href?: string | null; className?: string; short?: boolean }) {
+  const content = (
+    <>
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-gold/40 bg-gold/10">
         <Gem className="h-4 w-4 text-gold" />
       </span>
       <span className="font-display text-base font-semibold tracking-tight">
-        Shaqal <span className="text-gold">TradeOS</span>
+        Shaqal{short ? null : <> <span className="text-gold">TradeOS</span></>}
       </span>
+    </>
+  );
+  if (href === null) {
+    return (
+      <div aria-label={short ? "Shaqal" : "Shaqal TradeOS"} className={cn("flex items-center gap-2.5", className)}>
+        {content}
+      </div>
+    );
+  }
+  return (
+    <Link href={href} aria-label={short ? "Shaqal" : undefined} className={cn("flex items-center gap-2.5", className)}>
+      {content}
     </Link>
   );
 }

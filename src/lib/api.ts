@@ -101,7 +101,11 @@ async function request<T>(path: string, options: {
       }
     } catch {
       clearTokens();
-      if (typeof window !== "undefined") window.location.href = "/login";
+      // Session expiry returns you to the sign-in you came from — the platform
+      // login, or the operations console for admin sessions on /users.
+      if (typeof window !== "undefined") {
+        window.location.href = window.location.pathname.startsWith("/users") ? "/users" : "/login";
+      }
       throw new Error("Session expired");
     }
   }
@@ -126,6 +130,9 @@ export const api = {
       request<T.AuthResponse>("/auth/register", { method: "POST", body: data, headers: { "Idempotency-Key": crypto.randomUUID() } }),
     login: (data: { email: string; password: string }) =>
       request<T.AuthResponse>("/auth/login", { method: "POST", body: data }),
+    /** Operations-console sign-in — the only way an admin account can obtain tokens. */
+    operationsLogin: (data: { email: string; password: string }) =>
+      request<T.AuthResponse>("/auth/operations/login", { method: "POST", body: data }),
     refresh: () => refreshAccessToken(),
     logout: () => { clearTokens(); },
     forgotPassword: (email: string) =>
@@ -250,8 +257,15 @@ export const api = {
     get: (id: string) => request<any>("/payments/" + id),
   },
 
+  dashboard: {
+    /** Shell summary for the sidebar Compliance status box (any authenticated role). */
+    summary: () => request<T.DashboardSummary>("/dashboard/summary"),
+  },
+
+  /** In-app notifications — used by the shell + console bells. */
   notifications: {
-    list: (page = 0, size = 20) => request<{ content: any[]; totalElements: number }>("/notifications?page=" + page + "&size=" + size),
+    list: (page = 0, size = 20) =>
+      request<T.PageResponse<T.NotificationItem>>("/notifications", { params: { page, size } }),
     unreadCount: () => request<{ count: number }>("/notifications/unread-count"),
     markRead: (id: string) => request<void>("/notifications/" + id + "/read", { method: "POST" }),
     markAllRead: () => request<void>("/notifications/read-all", { method: "POST" }),
@@ -259,20 +273,61 @@ export const api = {
 
   admin: {
     listUsers: (search?: string, role?: string, page = 0, size = 20) => {
-      const params: Record<string, any> = { page, size };
+      const params: Record<string, string | number> = { page, size };
       if (search) params.search = search;
       if (role) params.role = role;
-      return request<any>("/admin/users", { params });
+      return request<T.PageResponse<T.AdminUser>>("/admin/users", { params });
     },
     deactivateUser: (userId: string, reason?: string) =>
       request<void>("/admin/users/" + userId + "/deactivate", { method: "POST", body: { reason: reason || "Admin action" } }),
     reactivateUser: (userId: string) =>
       request<void>("/admin/users/" + userId + "/reactivate", { method: "POST" }),
-    updateVerification: (userId: string, status: string, note?: string) =>
-      request<void>("/admin/users/" + userId + "/verification", { method: "PATCH", body: { status, note: note || "" } }),
-    stats: () => request<any>("/admin/stats"),
-    auditTrail: (page = 0, size = 50) => request<any[]>("/admin/audit?page=" + page + "&size=" + size),
-    systemHealth: () => request<any>("/admin/health"),
-    getUserActivity: (userId: string) => request<any>("/admin/users/" + userId + "/activity"),
+    updateVerification: (userId: string, status: string, reason?: string) =>
+      request<void>("/admin/users/" + userId + "/verification", { method: "PATCH", body: { status, reason: reason || "" } }),
+    changeRole: (userId: string, role: string, reason: string) =>
+      request<void>("/admin/users/" + userId + "/role", { method: "PATCH", body: { role, reason } }),
+    revokeSessions: (userId: string, reason: string) =>
+      request<{ revoked: number }>("/admin/users/" + userId + "/revoke-sessions", { method: "POST", body: { reason } }),
+    userAudit: (userId: string, page = 0, size = 50) =>
+      request<T.AuditEventRow[]>("/admin/users/" + userId + "/audit", { params: { page, size } }),
+    impersonate: (userId: string) =>
+      request<T.ImpersonationResult>("/admin/users/" + userId + "/impersonate", { method: "POST" }),
+    stats: () => request<T.PlatformStats>("/admin/stats"),
+    auditTrail: (page = 0, size = 50) => request<T.AuditEventRow[]>("/admin/audit?page=" + page + "&size=" + size),
+    systemHealth: () => request<T.SystemHealth>("/admin/health"),
+    getUserActivity: (userId: string) => request<T.UserActivity>("/admin/users/" + userId + "/activity"),
+
+    // Deals
+    deals: (params: Record<string, string | number | undefined>) =>
+      request<T.AdminPage<T.AdminDealRow>>("/admin/deals", { params }),
+    dealBlockers: (dealId: string) => request<T.DealBlockers>("/admin/deals/" + dealId + "/blockers"),
+    forceAdvance: (dealId: string, reason: string) =>
+      request<T.Deal>("/admin/deals/" + dealId + "/force-advance", { method: "POST", body: { reason } }),
+
+    // Payments
+    payments: (params: Record<string, string | number | undefined>) =>
+      request<T.AdminPage<T.AdminPaymentRow>>("/admin/payments", { params }),
+    webhookEvents: (params: Record<string, string | number | undefined>) =>
+      request<T.AdminPage<T.WebhookEventRow>>("/admin/payments/webhook-events", { params }),
+    reconcilePayment: (paymentId: string, status: string, reason: string) =>
+      request<T.ReconcileResult>("/admin/payments/" + paymentId + "/reconcile", { method: "POST", body: { status, reason } }),
+
+    // Compliance / KYC
+    kycQueue: (params: Record<string, string | number | undefined>) =>
+      request<T.AdminPage<T.KycQueueRow>>("/admin/kyc/queue", { params }),
+    kycBulkDecide: (submissionIds: string[], decision: string, note: string) =>
+      request<T.BulkDecideResult>("/admin/kyc/bulk-decisions", { method: "POST", body: { submissionIds, decision, note } }),
+
+    // Commissions
+    commissionTrees: (page = 0, size = 50) =>
+      request<T.AdminPage<T.CommissionTreeRow>>("/admin/commission-trees", { params: { page, size } }),
+
+    // Settings / config
+    config: () => request<T.ConfigEntry[]>("/admin/config"),
+    updateConfig: (key: string, value: string, description?: string) =>
+      request<void>("/admin/config/" + encodeURIComponent(key), { method: "PUT", body: { value, description: description || "" } }),
+    countryProfiles: () => request<T.CountryProfileRow[]>("/admin/config/countries"),
+    upsertCountryProfile: (code: string, body: { displayName: string; fields?: unknown[]; requiredDocTypes?: string[] }) =>
+      request<T.CountryProfileRow>("/admin/config/countries/" + encodeURIComponent(code), { method: "PUT", body }),
   },
 };

@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { Bell, Check, CheckCheck, X } from "lucide-react";
+import { Bell, CheckCheck, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface Notification {
+interface NotificationItem {
   id: string;
   notificationType: string;
   title: string;
@@ -14,89 +16,121 @@ interface Notification {
   createdAt: string;
 }
 
-export default function NotificationBell() {
+/**
+ * The platform notification bell — used by the dashboard shell AND the operations
+ * console. Talks to GET /notifications* through the api client so the request carries
+ * the Bearer token and the configured API base URL (the old inline fetch used a
+ * double-/api path with no auth header and 404'd silently).
+ */
+export default function NotificationBell({ className }: { className?: string }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
+  // Poll the unread badge every 30s (fires once on mount as well).
   useEffect(() => {
-    loadUnreadCount();
-    const interval = setInterval(loadUnreadCount, 30000); // Poll every 30s
-    return () => clearInterval(interval);
+    let alive = true;
+    const poll = () => {
+      api.notifications
+        .unreadCount()
+        .then((r) => {
+          if (alive) setUnreadCount(r?.count ?? 0);
+        })
+        .catch(() => {
+          /* transient — keep the last known count */
+        });
+    };
+    poll();
+    const interval = setInterval(poll, 30000);
+    return () => {
+      alive = false;
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  async function loadUnreadCount() {
-    try {
-      const res = await api.notifications.unreadCount();
-      setUnreadCount(res.count);
-    } catch {}
+  function toggleOpen() {
+    const next = !open;
+    setOpen(next);
+    if (next) loadNotifications();
   }
 
   async function loadNotifications() {
     setLoading(true);
+    setError(null);
     try {
       const res = await api.notifications.list(0, 20);
-      setNotifications(res.content || []);
-    } catch {}
-    setLoading(false);
-  }
-
-  function toggleOpen() {
-    const next = !open;
-    setOpen(next);
-    if (next) {
-      loadNotifications();
+      setNotifications(res?.content ?? []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load notifications");
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function markRead(id: string) {
+  async function markRead(n: NotificationItem) {
+    if (n.isRead) {
+      if (n.linkUrl) router.push(n.linkUrl);
+      return;
+    }
     try {
-      await api.notifications.markRead(id);
-      setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, isRead: true } : n));
+      await api.notifications.markRead(n.id);
+      setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, isRead: true } : x)));
       setUnreadCount((prev) => Math.max(0, prev - 1));
-    } catch {}
+      if (n.linkUrl) router.push(n.linkUrl);
+    } catch {
+      /* navigation is best-effort even if the read-mark fails */
+    }
   }
 
   async function markAllRead() {
     try {
       await api.notifications.markAllRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setNotifications((prev) => prev.map((x) => ({ ...x, isRead: true })));
       setUnreadCount(0);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
 
   return (
-    <div className="relative" ref={ref}>
+    <div className={cn("relative", className)} ref={ref}>
       <button
         onClick={toggleOpen}
-        className="relative p-2 rounded-lg hover:bg-dark-800 transition"
+        aria-label="Notifications"
+        className={cn(
+          "relative rounded-lg border border-border p-2 transition-all",
+          open ? "bg-secondary/60 text-foreground" : "text-muted-foreground hover:text-gold",
+        )}
       >
-        <Bell size={20} className="text-gray-muted" />
+        <Bell size={16} strokeWidth={1.5} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-danger rounded-full text-[10px] font-bold text-white flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full bg-gold px-1 text-[9px] font-bold text-primary-foreground flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 glass-panel rounded-xl shadow-2xl border border-dark-700 z-50">
-          <div className="flex items-center justify-between p-3 border-b border-dark-700">
-            <h3 className="text-sm font-semibold">Notifications</h3>
+        <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border bg-popover/95 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden z-50 animate-slide-down">
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+            <p className="text-[13px] font-semibold">Notifications</p>
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="text-xs text-gold-500 hover:text-gold-400 flex items-center gap-1">
+              <button
+                onClick={markAllRead}
+                className="flex items-center gap-1 text-[11px] font-medium text-gold transition hover:text-gold-bright"
+              >
                 <CheckCheck size={12} /> Mark all read
               </button>
             )}
@@ -104,26 +138,34 @@ export default function NotificationBell() {
 
           <div className="max-h-80 overflow-y-auto">
             {loading ? (
-              <div className="p-4 text-center text-gray-muted text-sm">Loading...</div>
+              <div className="flex items-center justify-center gap-2 px-5 py-8 text-[12px] text-muted-foreground">
+                <Loader2 size={14} className="animate-spin" /> Loading…
+              </div>
+            ) : error ? (
+              <div className="px-5 py-8 text-center text-[12px] text-danger">{error}</div>
             ) : notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-muted text-sm">No notifications</div>
+              <div className="px-5 py-8 text-center text-[12px] text-muted-foreground">
+                No notifications yet
+              </div>
             ) : (
               notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`p-3 border-b border-dark-700/50 hover:bg-dark-800/50 transition cursor-pointer ${!n.isRead ? "bg-gold-500/5" : ""}`}
-                  onClick={() => {
-                    markRead(n.id);
-                    if (n.linkUrl) window.location.href = n.linkUrl;
-                  }}
+                  onClick={() => markRead(n)}
+                  className={cn(
+                    "px-5 py-3.5 hover:bg-secondary/40 transition cursor-pointer border-b border-border/60 last:border-0",
+                    !n.isRead && "bg-gold/5",
+                  )}
                 >
-                  <div className="flex items-start gap-2">
-                    {!n.isRead && <div className="w-2 h-2 rounded-full bg-gold-500 mt-1.5 shrink-0" />}
+                  <div className="flex items-start gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{n.title}</p>
-                      <p className="text-[11px] text-gray-muted truncate">{n.body}</p>
-                      <p className="text-[10px] text-dark-500 mt-1">
-                        {new Date(n.createdAt).toLocaleString()}
+                      <div className="flex items-center gap-2">
+                        <p className="text-[13px] font-medium leading-snug">{n.title}</p>
+                        {!n.isRead && <div className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{n.body}</p>
+                      <p className="text-[10px] text-muted-foreground/70 mt-1.5 font-medium">
+                        {n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}
                       </p>
                     </div>
                   </div>

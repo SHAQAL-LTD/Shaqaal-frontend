@@ -5,8 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { api } from "@/lib/api";
+import { api, setTokens, clearTokens } from "@/lib/api";
+import { titleCase } from "@/lib/utils";
 import { Brand } from "@/components/app-shell";
+import NotificationBell from "@/components/NotificationBell";
 import {
   LayoutDashboard,
   FileText,
@@ -16,16 +18,17 @@ import {
   Menu,
   X,
   User,
-  Bell,
   ChevronDown,
   Settings,
   ClipboardList,
   Scale,
   CreditCard,
-  Users,
 } from "lucide-react";
 
 // ─── Role-Based Navigation ──────────────────────────────
+// NOTE: the admin role never appears here — Shaqal staff use the operations
+// console at /users only (ProtectedRoute bounces any admin session out of
+// this shell, and the platform login API rejects admin credentials).
 interface NavItem {
   href: string;
   label: string;
@@ -34,15 +37,14 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Deal Dashboard", icon: LayoutDashboard, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"] },
+  { href: "/dashboard", label: "Deal Dashboard", icon: LayoutDashboard, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator"] },
   { href: "/dashboard/deals", label: "Deals", icon: FileText, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
-  { href: "/dashboard/organizations", label: "Organizations", icon: Building2, roles: ["supplier", "buyer", "broker", "financier", "facilitator", "admin"] },
-  { href: "/dashboard/compliance", label: "Compliance", icon: ShieldCheck, roles: ["compliance_officer", "admin"] },
-  { href: "/dashboard/audit", label: "Audit Trail", icon: ClipboardList, roles: ["compliance_officer", "admin", "broker"] },
+  { href: "/dashboard/organizations", label: "Organizations", icon: Building2, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
+  { href: "/dashboard/compliance", label: "Compliance", icon: ShieldCheck, roles: ["compliance_officer"] },
+  { href: "/dashboard/audit", label: "Audit Trail", icon: ClipboardList, roles: ["compliance_officer", "broker"] },
   { href: "/dashboard/kyc", label: "KYC Onboarding", icon: Scale, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
-  { href: "/dashboard/payments", label: "Payments", icon: CreditCard, roles: ["supplier", "buyer", "broker", "financier", "facilitator", "admin"] },
-  { href: "/users", label: "Operations", icon: Users, roles: ["admin"] },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator", "admin"] },
+  { href: "/dashboard/payments", label: "Payments", icon: CreditCard, roles: ["supplier", "buyer", "broker", "financier", "facilitator"] },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings, roles: ["supplier", "buyer", "broker", "financier", "compliance_officer", "facilitator"] },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
@@ -101,39 +103,30 @@ function fmtAuditTs(raw: unknown): string | null {
 }
 
 /**
- * Data-driven compliance status. Active rooms are counted from the deals API;
- * the global last-audit timestamp is only exposed via GET /admin/audit today
- * (ADMIN-only) — other roles show "—" until a non-admin summary endpoint lands
- * (see docs/backend-changes-for-ui.md).
+ * Data-driven compliance status fed by GET /dashboard/summary: exact active-room count
+ * (row-level scoped to the caller) plus the global last-audit timestamp, readable by every
+ * authenticated role.
  */
 function ComplianceStatusBox() {
-  const { user } = useAuth();
   const [activeRooms, setActiveRooms] = useState<number | null>(null);
   const [lastAuditAt, setLastAuditAt] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
-    (async () => {
-      try {
-        const page = await api.deals.list(0, 100);
-        if (alive) setActiveRooms(page.content.filter((d) => !d.completed).length);
-      } catch {
+    api.dashboard
+      .summary()
+      .then((s) => {
+        if (!alive) return;
+        setActiveRooms(s.activeRooms);
+        setLastAuditAt(fmtAuditTs(s.lastAuditAt));
+      })
+      .catch(() => {
         /* keep — */
-      }
-      if (user?.role === "admin") {
-        try {
-          const events: Array<Record<string, unknown>> = await api.admin.auditTrail(0, 1);
-          const ts = fmtAuditTs(events?.[0]?.occurred_at);
-          if (alive && ts) setLastAuditAt(ts);
-        } catch {
-          /* keep — */
-        }
-      }
-    })();
+      });
     return () => {
       alive = false;
     };
-  }, [user?.role]);
+  }, []);
 
   return (
     <div className="mt-10 shrink-0 rounded-2xl border border-gold/20 bg-gold/5 p-4">
@@ -161,7 +154,9 @@ function SidebarContent({ onNavClick, hideBrand }: { onNavClick?: () => void; hi
 
   return (
     <>
-      {hideBrand ? null : <Brand href="/" />}
+      {/* Inert mark — the logo never navigates away from the shell; signing
+          out happens only via the account menu. */}
+      {hideBrand ? null : <Brand href={null} className="shrink-0" />}
       <nav className="mt-8 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
         {visibleNav.map((item) => {
           const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -221,7 +216,7 @@ function UserDropdown() {
       {open && (
         <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-border bg-popover/95 backdrop-blur-xl shadow-2xl shadow-black/60 py-2 z-50 animate-slide-down">
           <div className="px-4 py-3 border-b border-border">
-            <p className="text-[13px] font-semibold truncate">{user?.fullName}</p>
+            <p className="text-[13px] font-semibold truncate">{titleCase(user?.fullName)}</p>
             <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
           </div>
           <div className="p-1.5">
@@ -244,86 +239,78 @@ function UserDropdown() {
 }
 
 
-// Notification Bell (live)
-function NotificationBell() {
-  const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
+// ─── View-As (impersonation) session banner ─────────────
+interface OpsBackup {
+  accessToken: string;
+  refreshToken: string;
+  targetName?: string;
+  targetEmail?: string;
+  expiresAt: number;
+}
+
+/** Key under which the operations console stashes the admin session while impersonating. */
+const OPS_BACKUP_KEY = "shaqal_ops_backup";
+
+/**
+ * Rendered only while an admin is viewing the platform as another user ("View-As").
+ * The operations console swaps in a 15-minute impersonation token and parks the admin
+ * session here; exiting restores it and returns to /users. Cleared automatically by the
+ * nuclear logout on any normal sign-in.
+ */
+function ImpersonationBanner() {
+  const [info, setInfo] = useState<OpsBackup | null>(null);
+  const [expired, setExpired] = useState(false);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    // Deferred read: setState must not run synchronously inside the effect body.
+    let alive = true;
+    const t = setTimeout(() => {
+      try {
+        const raw = sessionStorage.getItem(OPS_BACKUP_KEY);
+        if (alive && raw) {
+          const parsed = JSON.parse(raw) as OpsBackup;
+          setInfo(parsed);
+          setExpired(Date.now() > parsed.expiresAt);
+        }
+      } catch {
+        /* ignore malformed backup */
+      }
+    }, 0);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
   }, []);
 
-  useEffect(() => {
-    fetch("/api/notifications/unread-count").then(r => r.ok ? r.json() : { count: 0 }).then(d => setUnreadCount(d.count)).catch(() => {});
-  }, [open]);
+  if (!info) return null;
 
-  useEffect(() => {
-    if (open) {
-      fetch("/api/notifications?page=0&size=20").then(r => r.ok ? r.json() : { content: [] }).then(d => setNotifications(d.content || [])).catch(() => {});
+  function exitViewAs() {
+    try {
+      const raw = sessionStorage.getItem(OPS_BACKUP_KEY);
+      const backup = raw ? (JSON.parse(raw) as OpsBackup) : null;
+      clearTokens();
+      if (backup?.accessToken) {
+        setTokens(backup.accessToken, backup.refreshToken || "");
+      }
+      sessionStorage.removeItem(OPS_BACKUP_KEY);
+    } catch {
+      /* fall through — redirect still gets the admin back */
     }
-  }, [open]);
-
-  const handleMarkAllRead = () => {
-    fetch("/api/notifications/read-all", { method: "POST" }).then(() => {
-      setUnreadCount(0);
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    }).catch(() => {});
-  };
+    window.location.replace("/users");
+  }
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gold/40 bg-gold/10 px-4 py-2 sm:px-8">
+      <p className="min-w-0 truncate text-[12px] text-gold">
+        <span className="font-semibold">View-as session</span> — {info.targetName || info.targetEmail || "user"}
+        {expired ? " (expired)" : ` · ends ${new Date(info.expiresAt).toLocaleTimeString()}`}
+      </p>
       <button
-        onClick={() => setOpen(!open)}
-        aria-label="Notifications"
-        className={`relative rounded-lg border border-border p-2 transition-all ${open ? "bg-secondary/60 text-foreground" : "text-muted-foreground hover:text-gold"}`}
+        onClick={exitViewAs}
+        className="shrink-0 rounded-lg border border-gold/40 px-3 py-1 text-[12px] font-semibold text-gold transition hover:bg-gold/20"
       >
-        <Bell size={16} strokeWidth={1.5} />
-        {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 rounded-full bg-gold px-1 text-[9px] font-bold text-primary-foreground flex items-center justify-center">
-            {unreadCount}
-          </span>
-        )}
+        Exit view-as
       </button>
-
-      {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border bg-popover/95 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden z-50 animate-slide-down">
-          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <p className="text-[13px] font-semibold">Notifications</p>
-            {unreadCount > 0 && (
-              <span className="text-[10px] font-bold text-gold bg-gold/10 px-2 py-0.5 rounded-full">{unreadCount} new</span>
-            )}
-          </div>
-          <div className="max-h-80 overflow-y-auto">
-            {notifications.length === 0 && (
-              <div className="px-5 py-8 text-center text-[12px] text-muted-foreground">No notifications</div>
-            )}
-            {notifications.map((n) => (
-              <div key={n.id} className="px-5 py-3.5 hover:bg-secondary/40 transition cursor-pointer border-b border-border/60 last:border-0 group">
-                <div className="flex items-start gap-3">
-                  <span className="text-lg mt-0.5 shrink-0">🔔</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-[13px] font-medium leading-snug">{n.title}</p>
-                      {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-gold shrink-0" />}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{n.message}</p>
-                    <p className="text-[10px] text-muted-foreground/70 mt-1.5 font-medium">{n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ""}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="px-5 py-3 border-t border-border text-center">
-            <button onClick={handleMarkAllRead} className="text-[11px] font-medium text-gold hover:text-gold-bright transition">Mark all as read</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -362,17 +349,32 @@ function TopNavbar({ onMenuClick }: { onMenuClick: () => void }) {
 // ─── Layout (DESIGN AppShell grid) ──────────────────────
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mainRef = React.useRef<HTMLElement>(null);
+  const pathname = usePathname();
+
+  // The shell owns scrolling: <main> is the ONLY scroll container (the sidebar
+  // and top navbar are pinned), so window scroll never moves. Client-side
+  // navigations therefore have to reset the main pane explicitly.
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen w-full lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
-        <aside className="hidden border-r border-sidebar-border bg-sidebar/80 p-5 lg:block">
+      {/* h-screen + overflow-hidden: the document itself never scrolls. The
+          sidebar lives in its own fixed-width column (its nav scrolls
+          internally when long, the compliance box stays pinned at its foot),
+          the top navbar sits at the top of the content column, and only the
+          main pane below it scrolls. */}
+      <div className="flex h-screen w-full overflow-hidden">
+        <aside className="hidden w-[264px] shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar/80 p-5 lg:flex">
           <SidebarContent />
         </aside>
 
-        <div className="min-w-0">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <ImpersonationBanner />
           <TopNavbar onMenuClick={() => setMobileOpen(true)} />
-          <main className="min-w-0">{children}</main>
+          <main ref={mainRef} className="min-w-0 flex-1 min-h-0 overflow-y-auto">{children}</main>
         </div>
 
         {mobileOpen && (
@@ -380,7 +382,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="absolute inset-0 bg-black/70" onClick={() => setMobileOpen(false)} />
             <div className="absolute inset-y-0 left-0 flex w-72 flex-col border-r border-sidebar-border bg-sidebar p-5">
               <div className="flex items-center justify-between">
-                <Brand href="/" />
+                <Brand href={null} />
                 <button
                   onClick={() => setMobileOpen(false)}
                   aria-label="Close navigation"

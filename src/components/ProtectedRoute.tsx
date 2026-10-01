@@ -9,15 +9,23 @@ import { useEffect } from "react";
  * protected content. It:
  * 1. Shows a loading spinner while auth state is being determined
  * 2. Immediately redirects to /login if no user is confirmed
- * 3. Returns null (renders nothing) until user is confirmed
+ * 3. Redirects admin accounts to /users — Shaqal staff use the operations
+ *    console only, never the platform dashboard
+ * 4. Returns null (renders nothing) until user is confirmed
  */
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return;
+    if (!user) {
       router.replace("/login");
+      return;
+    }
+    // Admin accounts are operations-only — keep them out of the platform shell.
+    if (user.role === "admin") {
+      router.replace("/users");
     }
   }, [loading, user, router]);
 
@@ -35,6 +43,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   // No user confirmed — render nothing while redirect happens
   if (!user) return null;
+
+  // Admin is being redirected to the operations console — render nothing here
+  if (user.role === "admin") return null;
 
   // User confirmed — safe to render children
   return <>{children}</>;

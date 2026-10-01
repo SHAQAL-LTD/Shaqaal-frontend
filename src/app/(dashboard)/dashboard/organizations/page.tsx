@@ -50,8 +50,7 @@ export default function OrganizationsPage() {
 
   return (
     <div className="p-4 md:p-8 lg:p-10 space-y-6 animate-fade-in-up">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <p className="max-w-xl text-sm text-muted-foreground">Register an entity once and reuse it as a counterparty and KYC packet across every deal room.</p>
+      <div className="flex justify-end">
         <button onClick={() => setShowCreate(true)} className="button-gold shrink-0 px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm font-medium">
           <Plus size={16} /> New Organization
         </button>
@@ -94,12 +93,15 @@ export default function OrganizationsPage() {
       {/* Create Modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCreate(false)} />
-          <div className="relative bg-dark-900 border border-dark-700 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowCreate(false)} />
+          <div className="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl border border-dark-700 bg-dark-900 p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold">New Organization</h3>
               <button onClick={() => setShowCreate(false)} className="text-gray-muted hover:text-white transition"><X size={20} /></button>
             </div>
+            <p className="mb-5 text-sm text-muted-foreground">
+              Register an entity once and reuse it as a counterparty and KYC packet across every deal room.
+            </p>
             {createError && <div className="flex items-center gap-2 bg-danger/10 border border-danger/40 rounded-lg p-3 mb-4"><AlertCircle size={16} className="text-danger shrink-0" /><p className="text-danger text-sm">{createError}</p></div>}
             <div className="space-y-4">
               <div><label className="block text-sm font-medium text-gray-muted mb-1.5">Trading name *</label><input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ashanti Madalali Coop" className={ic} /></div>

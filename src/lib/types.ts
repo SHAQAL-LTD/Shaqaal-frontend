@@ -231,3 +231,239 @@ export interface ApiError {
   errorCode: string;
   detail: string;
 }
+
+// ─── Dashboard shell summary (GET /dashboard/summary) ──
+export interface DashboardSummary {
+  /** Exact count of non-completed deals visible to the caller. */
+  activeRooms: number;
+  /** Global latest audit-event timestamp (ISO-8601), null when the log is empty. */
+  lastAuditAt: string | null;
+}
+
+// ─── Operations console (/admin/*, /notifications) ─────
+
+/** Flat page shape returned by the operations list endpoints. */
+export interface AdminPage<T> {
+  content: T[];
+  totalElements: number;
+  page: number;
+  size: number;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  fullName: string;
+  phone: string | null;
+  role: string;
+  country: string | null;
+  verificationStatus: string | null;
+  active: boolean;
+  emailVerified: boolean;
+  emailVerifiedAt: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface ImpersonationResult {
+  accessToken: string;
+  user: AdminUser;
+  expiresInMinutes: number;
+}
+
+export interface UserActivity {
+  user: AdminUser;
+  dealCount: number;
+  paymentCount: number;
+  auditCount: number;
+}
+
+/** One `audit_event` row (raw JDBC columns — snake_case). */
+export interface AuditEventRow {
+  id: string;
+  occurred_at: string;
+  actor_user_id: string | null;
+  actor_role: string | null;
+  module: string;
+  entity_type: string;
+  entity_id: string;
+  action: string;
+  before_json: string | null;
+  after_json: string | null;
+  ip_address: string | null;
+  correlation_id: string | null;
+  actor_name: string | null;
+  actor_email: string | null;
+}
+
+export interface PlatformStats {
+  totalUsers: number;
+  activeUsers: number;
+  verifiedUsers: number;
+  totalDeals: number;
+  totalKyc: number;
+  recentUsers: number;
+  recentDeals: number;
+  usersByRole: { role: string; count: number }[];
+  dealsByStage: { stage: string; count: number }[];
+  paymentSummary: { status: string; count: number; total: number | string }[];
+}
+
+export interface SystemHealth {
+  status: string;
+  degradedReasons: string[];
+  database: {
+    status: string;
+    type: string;
+    sizeBytes: number;
+    tables: number;
+    pool: { active?: number; idle?: number; total?: number; awaiting?: number };
+  };
+  redis: { status: string; rateLimiting: string };
+  webhooks: {
+    last24h: { provider: string; status: string; count: number }[];
+    failures24h: number;
+  };
+  notifications: {
+    last24h: { channel: string; status: string; count: number }[];
+    failures24h: number;
+    unreadInApp: number;
+  };
+}
+
+export interface AdminDealRow {
+  id: string;
+  utid: string | null;
+  stage: string;
+  completed: boolean;
+  mineral: string | null;
+  origin: string | null;
+  destination: string | null;
+  price: number | string | null;
+  created_at: string;
+  updated_at: string;
+  creator_name: string;
+  creator_email: string;
+  document_count: number;
+  completed_payments: number;
+}
+
+export interface DealBlockers {
+  dealId: string;
+  stage: string;
+  completed: boolean;
+  blocked: boolean;
+  blockers: { gate: string; ok: boolean; message: string }[];
+  documents: { type: string; created_at: string }[];
+  partyRoles: string[];
+  payments: { completedCount: number; failedCount: number; pendingCount: number };
+}
+
+export interface AdminPaymentRow {
+  id: string;
+  status: string;
+  method: string;
+  type: string;
+  amount: number | string;
+  currency: string;
+  reference: string | null;
+  txHash: string | null;
+  network: string | null;
+  description: string | null;
+  created_at: string;
+  paid_at: string | null;
+  dealId: string;
+  dealUtid: string | null;
+  payerId: string;
+  payerName: string;
+  payerEmail: string;
+  payeeName: string | null;
+}
+
+export interface WebhookEventRow {
+  id: string;
+  provider: string;
+  externalReference: string | null;
+  paymentId: string | null;
+  status: string;
+  errorMessage: string | null;
+  payload: string | null;
+  receivedAt: string;
+}
+
+export interface ReconcileResult {
+  id: string;
+  status: string;
+  previousStatus: string;
+  paidAt: string | null;
+}
+
+export interface KycQueueRow {
+  id: string;
+  user_id: string;
+  status: string;
+  reviewer_note: string | null;
+  submitted_at: string;
+  reviewed_at: string | null;
+  user_name: string;
+  user_email: string;
+  country: string;
+  role: string;
+  user_verification: string;
+  age_hours: number;
+  document_count: number;
+  risk: "HIGH" | "MEDIUM" | "LOW";
+}
+
+export interface BulkDecideResult {
+  processed: number;
+  errors: { submissionId: string; error: string }[];
+}
+
+export interface CommissionTreeRow {
+  id: string;
+  locked: boolean;
+  locked_at: string | null;
+  created_at: string;
+  deal_id: string;
+  utid: string | null;
+  completed: boolean;
+  current_stage: string;
+  manual_price_usd: number | string | null;
+  total_percent: number | string;
+  node_count: number;
+  payout_count: number;
+  payouts_paid: number;
+  payouts_pending: number;
+  payouts_failed: number;
+  payout_total: number | string;
+  issues: string[];
+}
+
+export interface ConfigEntry {
+  key: string;
+  value: unknown;
+  description: string | null;
+  updatedAt: string | null;
+  updatedBy: string | null;
+}
+
+export interface CountryProfileRow {
+  country: string;
+  schemaVersion: number;
+  displayName: string | null;
+  fields: unknown[];
+  requiredDocTypes: string[];
+  updatedAt: string | null;
+}
+
+export interface NotificationItem {
+  id: string;
+  notificationType: string;
+  title: string;
+  body: string;
+  linkUrl: string | null;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+}

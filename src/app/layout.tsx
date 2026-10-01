@@ -7,11 +7,12 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Shaqal TradeOS — Audited Commodity Deal Infrastructure",
+  title: "Shaqal — Audited Commodity Deal Infrastructure",
   description:
-    "Shaqal TradeOS runs gold and mineral trades through ten compliance-gated stages with KYC onboarding, encrypted document vaults and UTID-sealed settlement.",
+    "Shaqal runs gold and mineral trades through ten compliance-gated stages with KYC onboarding, encrypted document vaults and UTID-sealed settlement.",
+  icons: { icon: "/favicon.ico" },
   openGraph: {
-    title: "Shaqal TradeOS",
+    title: "Shaqal",
     description: "Compliance-gated deal rooms, encrypted vaults and cryptographic settlement for high-value commodity trading.",
     type: "website",
   },

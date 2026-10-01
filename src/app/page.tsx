@@ -19,6 +19,7 @@ import {
   ServerCog,
 } from "lucide-react";
 import { Brand } from "@/components/app-shell";
+import { Footer } from "@/components/footer";
 import { Card } from "@/components/ui-kit";
 
 const features = [
@@ -137,7 +138,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Brand />
+          <Brand short />
           <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
             <a href="#platform" className="transition-colors hover:text-gold">
               Platform
@@ -183,7 +184,7 @@ export default function LandingPage() {
                 <span className="text-gold">audited pipeline</span>.
               </h1>
               <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
-                Shaqal TradeOS replaces scattered WhatsApp threads and PDF chains with a single
+                Shaqal replaces scattered WhatsApp threads and PDF chains with a single
                 compliance-gated deal room — built for brokers, buyers, mandates and compliance
                 officers working high-value commodity transactions.
               </p>
@@ -254,7 +255,7 @@ export default function LandingPage() {
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             Documentation gaps, unverifiable mandates and unclear commission splits kill deals.
-            TradeOS makes each of them a structured, reviewable step.
+            Shaqal makes each of them a structured, reviewable step.
           </p>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
@@ -370,7 +371,7 @@ export default function LandingPage() {
             <Quote className="absolute -right-4 -top-4 h-28 w-28 text-gold/5" />
             <blockquote className="relative max-w-3xl font-display text-xl leading-relaxed text-foreground sm:text-2xl">
               &ldquo;We used to lose three weeks per transaction reconciling assay reports and
-              mandate letters across five inboxes. On TradeOS the evidence is either in the room or
+              mandate letters across five inboxes. On Shaqal the evidence is either in the room or
               the stage doesn&apos;t open.&rdquo;
             </blockquote>
             <figcaption className="relative mt-6 text-sm text-muted-foreground">
@@ -456,39 +457,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t border-border bg-sidebar/30">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
-          <div className="min-w-0">
-            <Brand />
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Audited deal infrastructure for gold, minerals and high-value physical commodity
-              trade.
-            </p>
-          </div>
-          {[
-            { title: "Platform", items: ["Deal rooms", "Document vault", "Commission engine", "Audit log"] },
-            { title: "Compliance", items: ["KYC & screening", "Sanctions policy", "Data residency", "Security"] },
-            { title: "Company", items: ["About Shaqal", "Contact desk", "Terms", "Privacy"] },
-          ].map((col) => (
-            <div key={col.title}>
-              <p className="text-xs uppercase tracking-[0.18em] text-gold">{col.title}</p>
-              <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
-                {col.items.map((item) => (
-                  <li key={item} className="transition-colors hover:text-foreground">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="border-t border-border">
-          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-5 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
-            <p className="tnum">© 2026 Shaqal Metals FZE · ISO 27001 · FATF aligned</p>
-            <p>Dubai · Accra · Geneva</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

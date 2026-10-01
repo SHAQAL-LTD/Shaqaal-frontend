@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
+import { titleCase } from "@/lib/utils";
 import {
   User,
   Shield,
@@ -53,7 +54,7 @@ export default function SettingsPage() {
             {user?.fullName?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-bold">{user?.fullName}</h2>
+            <h2 className="text-xl font-bold">{titleCase(user?.fullName)}</h2>
             <p className="text-sm text-gray-muted">{user?.email}</p>
             <div className="flex items-center gap-2 mt-2">
               <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gold-500/10 text-gold-500 border border-gold-500/20">
