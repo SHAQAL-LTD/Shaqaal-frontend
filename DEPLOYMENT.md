@@ -26,11 +26,13 @@ Three moving parts:
 # ── Profile: "production" (same one render.yaml uses) ──
 SPRING_PROFILES_ACTIVE=production
 
-# ── Postgres — Railway's URI has NO "jdbc:" prefix, so compose it by hand ──
-# Copy PGHOST / PGPORT / PGDATABASE from the Postgres service's Variables tab:
-DATABASE_URL=jdbc:postgresql://<PGHOST>:<PGPORT>/<PGDATABASE>?sslmode=require
-DB_USERNAME=${{Postgres.PGUSER}}
-DB_PASSWORD=${{Postgres.PGPASSWORD}}
+# ── Postgres — Railway's native PG* names; the app builds the JDBC URL ──
+# (jdbc:postgresql://$PGHOST:$PGPORT/$PGDATABASE?sslmode=require) itself.
+PGHOST=${{Postgres.PGHOST}}
+PGPORT=${{Postgres.PGPORT}}
+PGDATABASE=${{Postgres.PGDATABASE}}
+PGUSER=${{Postgres.PGUSER}}
+PGPASSWORD=${{Postgres.PGPASSWORD}}
 
 # ── Redis ──
 REDIS_HOST=${{Redis.REDISHOST}}
@@ -49,6 +51,8 @@ RESEND_API_KEY=<optional — without it, verification/reset emails silently no-o
 ```
 
 Notes:
+- All five `PG*` variables are **required** — the production profile fails fast at boot if any
+  is missing (no silent fallback to a wrong database).
 - `${{Postgres.…}}` / `${{Redis.…}}` are Railway **reference variables** — pick them from the
   autocomplete so the value follows the plugin. They require both services to exist first.
 - `SPRING_PROFILES_ACTIVE=production` **overrides** the `prod` profile baked into the Dockerfile;
