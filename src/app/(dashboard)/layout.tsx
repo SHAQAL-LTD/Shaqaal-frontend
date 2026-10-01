@@ -90,7 +90,7 @@ function headerTitle(pathname: string): { title: string; subtitle?: string } {
   );
   if (route) return { title: route.title, subtitle: route.subtitle };
   const last = pathname.split("/").filter(Boolean).pop();
-  return { title: last ? prettify(last) : "Shaqal TradeOS" };
+  return { title: last ? prettify(last) : "Shaqal Trade" };
 }
 
 // ─── Sidebar ────────────────────────────────────────────

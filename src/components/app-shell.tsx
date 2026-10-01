@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
  * logo must never navigate away (signing out happens only via the account
  * menu's Sign Out), so the shell passes `href={null}`.
  *
- * `short` drops the TradeOS wordmark — the landing page presents the brand as
+ * `short` drops the "Trade" wordmark — the landing page presents the brand as
  * "Shaqal" only.
  */
 export function Brand({ href = "/", className, short = false }: { href?: string | null; className?: string; short?: boolean }) {
@@ -21,13 +21,13 @@ export function Brand({ href = "/", className, short = false }: { href?: string 
         <Gem className="h-4 w-4 text-gold" />
       </span>
       <span className="font-display text-base font-semibold tracking-tight">
-        Shaqal{short ? null : <> <span className="text-gold">TradeOS</span></>}
+        Shaqal{short ? null : <> <span className="text-gold">Trade</span></>}
       </span>
     </>
   );
   if (href === null) {
     return (
-      <div aria-label={short ? "Shaqal" : "Shaqal TradeOS"} className={cn("flex items-center gap-2.5", className)}>
+      <div aria-label={short ? "Shaqal" : "Shaqal Trade"} className={cn("flex items-center gap-2.5", className)}>
         {content}
       </div>
     );

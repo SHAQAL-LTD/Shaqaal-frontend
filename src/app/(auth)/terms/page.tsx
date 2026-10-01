@@ -12,7 +12,7 @@ export default function TermsPage() {
           title: "1. Acceptance of Terms",
           body: (
             <p>
-              By accessing or using the Shaqal TradeOS platform, you agree to be bound by these
+              By accessing or using the Shaqal Trade platform, you agree to be bound by these
               Terms of Service. If you do not agree, do not use the Platform.
             </p>
           ),
@@ -21,7 +21,7 @@ export default function TermsPage() {
           title: "2. Platform Description",
           body: (
             <p>
-              Shaqal TradeOS is a digital trade facilitation platform for mineral commodity trading
+              Shaqal Trade is a digital trade facilitation platform for mineral commodity trading
               across Africa. It provides deal pipeline management, document management, payment
               processing (fiat and crypto), and compliance verification services.
             </p>

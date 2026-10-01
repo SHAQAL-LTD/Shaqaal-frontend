@@ -2,13 +2,6 @@
   "framework": "nextjs",
   "buildCommand": "npx next build",
   "installCommand": "npm install",
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@api-url",
-    "NEXT_PUBLIC_SENTRY_DSN": "@sentry-dsn",
-    "SENTRY_ORG": "@sentry-org",
-    "SENTRY_PROJECT": "@sentry-project",
-    "SENTRY_AUTH_TOKEN": "@sentry-auth-token"
-  },
   "rewrites": [
     {
       "source": "/api/sentry-tunnel",

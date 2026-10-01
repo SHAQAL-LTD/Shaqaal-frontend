@@ -313,14 +313,9 @@ function OperationsConsole() {
               itself (with its Refresh/actions row) — see src/app/users/console/*. */}
           <div className="ml-auto flex shrink-0 items-center gap-3">
             <NotificationBell />
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 rounded-xl border border-border bg-secondary/60 px-3 py-2 text-[13px] font-medium text-foreground transition hover:border-gold/50 hover:text-gold-bright"
-            >
-              <LogOut size={14} />
-              <span className="hidden sm:inline">Sign out</span>
-            </button>
           </div>
+          {/* Sign out lives ONLY in the sidebar footer, next to the account
+              identity block (Platform Admin / e-mail) — no header duplicate. */}
         </header>
 
         {/* The main pane is the only scroll container. */}

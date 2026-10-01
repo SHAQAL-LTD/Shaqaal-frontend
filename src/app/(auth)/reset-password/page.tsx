@@ -78,7 +78,7 @@ export default function ResetPasswordPage() {
     <AuthShell
       eyebrow="Account recovery"
       title="Reset password"
-      subtitle="Choose a new password for your TradeOS account."
+      subtitle="Choose a new password for your Shaqal Trade account."
     >
       <Suspense fallback={<div className="mt-6 glass rounded-2xl p-8 text-center text-muted-foreground">Loading...</div>}>
         <ResetPasswordForm />
