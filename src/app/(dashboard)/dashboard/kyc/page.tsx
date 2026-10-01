@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { KycSubmission, CountryProfile } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { EmptyState } from "@/components/ui-kit";
@@ -62,7 +62,7 @@ export default function KycPage() {
       setShowSubmit(false); setSelectedFiles([]); setDocTypes([]);
       loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Submission failed");
+      setError(apiErrorMessage(err, "Submission failed"));
     } finally { setSubmitting(false); }
   }
 

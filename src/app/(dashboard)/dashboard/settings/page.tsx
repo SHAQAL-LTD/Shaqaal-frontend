@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import { titleCase } from "@/lib/utils";
 import {
   User,
@@ -36,7 +36,7 @@ export default function SettingsPage() {
       await api.auth.forgotPassword(user.email);
       setPasswordSent(true);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to send reset email");
+      setError(apiErrorMessage(err, "Failed to send reset email"));
     } finally {
       setLoading(false);
     }

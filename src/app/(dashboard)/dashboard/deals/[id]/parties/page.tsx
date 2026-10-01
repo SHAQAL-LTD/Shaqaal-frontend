@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import { selectClass, EmptyState } from "@/components/ui-kit";
 import type { DealParty, Organization, PageResponse } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,7 +61,7 @@ export default function DealPartiesPage() {
       setParties(partiesData);
       setOrgs(orgsData);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
+      setError(apiErrorMessage(err, "Failed to load data"));
     } finally {
       setLoading(false);
     }
@@ -86,7 +86,7 @@ export default function DealPartiesPage() {
       setSelectedRole("");
       loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to add party");
+      setError(apiErrorMessage(err, "Failed to add party"));
     } finally {
       setAdding(false);
     }
@@ -102,7 +102,7 @@ export default function DealPartiesPage() {
       setSuccess("Party removed");
       loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to remove party");
+      setError(apiErrorMessage(err, "Failed to remove party"));
     } finally {
       setRemoving(null);
     }

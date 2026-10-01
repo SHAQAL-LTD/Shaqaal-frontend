@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthShell } from "@/components/app-shell";
 import { GoldButton, inputClass } from "@/components/ui-kit";
+import { apiErrorMessage } from "@/lib/api";
 import { ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
@@ -25,7 +26,7 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/dashboard");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Login failed";
+      const msg = apiErrorMessage(err, "Login failed");
       setError(msg);
     } finally {
       setLoading(false);

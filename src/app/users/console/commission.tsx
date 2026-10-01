@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { CommissionTreeRow } from "@/lib/types";
 import { GitBranch, RefreshCw } from "lucide-react";
 import {
@@ -39,7 +39,7 @@ export default function CommissionSection() {
         setError(null);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Failed to load commission trees");
+        if (alive) setError(apiErrorMessage(e, "Failed to load commission trees"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -57,7 +57,7 @@ export default function CommissionSection() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Commission trees</h2>
+          <h1 className="text-lg font-semibold">Commission trees</h1>
           <p className="text-[13px] text-gray-muted">
             Allocation totals, lock state and disbursement — catch trees that don&apos;t total 100% or never paid out.
           </p>

@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
-import type { Deal } from "@/lib/types";
+import { api, advanceErrorMessage, apiErrorMessage } from "@/lib/api";
+import type { Deal, DealBlockers } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge, Card, GoldButton, SectionTitle } from "@/components/ui-kit";
 import {
@@ -46,6 +46,7 @@ export default function DealDetailPage() {
   const { user } = useAuth();
   const dealId = params.id as string;
   const [deal, setDeal] = useState<Deal | null>(null);
+  const [blockers, setBlockers] = useState<DealBlockers | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [advancing, setAdvancing] = useState(false);
@@ -60,10 +61,15 @@ export default function DealDetailPage() {
     setLoading(true);
     setError("");
     try {
-      const d = await api.deals.get(dealId);
+      // Gate analysis is advisory — a failure there must never block the page.
+      const [d, blk] = await Promise.all([
+        api.deals.get(dealId),
+        api.deals.blockers(dealId).catch(() => null),
+      ]);
       setDeal(d);
+      setBlockers(blk);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load deal");
+      setError(apiErrorMessage(err, "Failed to load deal"));
     } finally {
       setLoading(false);
     }
@@ -76,14 +82,18 @@ export default function DealDetailPage() {
       const updated = await api.deals.advance(deal.id, "Stage advanced via dashboard");
       setDeal(updated);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to advance deal");
+      setError(advanceErrorMessage(err));
     } finally {
       setAdvancing(false);
+      // Re-run the gate analysis so the inline note reflects the real outcome.
+      api.deals.blockers(deal.id).then(setBlockers).catch(() => {});
     }
   }
 
   const currentIdx = deal ? stageIndex(deal.currentStage) : 0;
   const current = currentIdx + 1;
+  // Proactively list what's missing before the user clicks Advance and hits a gate.
+  const missing = blockers?.blocked ? blockers.blockers.filter((b) => !b.ok) : [];
 
   const quickLinks = [
     { href: `/dashboard/deals/${dealId}/parties`, label: "Parties", icon: Users, desc: "Manage deal organizations" },
@@ -178,6 +188,23 @@ export default function DealDetailPage() {
                 })}
               </ol>
             </div>
+
+            {/* Proactive stage-gate note — why the next advance can't happen yet. */}
+            {missing.length > 0 && (
+              <div className="mt-4 rounded-xl border border-gold/40 bg-gold/10 p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-gold">
+                  Can&apos;t advance yet — missing requirements
+                </p>
+                <ul className="mt-1.5 space-y-1 text-xs text-muted-foreground">
+                  {missing.map((b) => (
+                    <li key={b.gate} className="flex gap-1.5">
+                      <AlertCircle size={13} className="mt-0.5 shrink-0 text-gold" />
+                      <span>{b.message}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Deal Details Grid */}
             <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">

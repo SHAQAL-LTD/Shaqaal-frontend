@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { PlatformStats, SystemHealth } from "@/lib/types";
 import {
   Activity, AlertTriangle, ArrowRight, FileText, RefreshCw,
@@ -33,7 +33,7 @@ export default function OverviewSection({ onNavigate }: { onNavigate: (key: stri
         setError(null);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Failed to load overview");
+        if (alive) setError(apiErrorMessage(e, "Failed to load overview"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -54,7 +54,7 @@ export default function OverviewSection({ onNavigate }: { onNavigate: (key: stri
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Overview</h2>
+          <h1 className="text-lg font-semibold">Overview</h1>
           <p className="text-[13px] text-gray-muted">Platform pulse across users, deals and money movement.</p>
         </div>
         <button

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import { inputClass, selectClass } from "@/components/ui-kit";
 import { ArrowLeft, ArrowRight, AlertCircle, Check, Loader2 } from "lucide-react";
 
@@ -64,7 +64,7 @@ export default function NewDealPage() {
       });
       router.push(`/dashboard/deals/${deal.id}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create deal");
+      setError(apiErrorMessage(err, "Failed to create deal"));
       setStep(0);
     } finally {
       setLoading(false);

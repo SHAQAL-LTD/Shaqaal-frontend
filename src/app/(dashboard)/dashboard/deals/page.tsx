@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { Deal, PageResponse } from "@/lib/types";
 import { Badge, Card, EmptyState, GoldButton, SectionTitle, inputClass } from "@/components/ui-kit";
 import {
@@ -60,7 +60,7 @@ export default function DealsListPage() {
       setDeals(res.content);
       setTotalPages(res.totalPages);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load deals");
+      setError(apiErrorMessage(err, "Failed to load deals"));
     } finally {
       setLoading(false);
     }

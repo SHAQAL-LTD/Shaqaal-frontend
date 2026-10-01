@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { AdminDealRow, DealBlockers } from "@/lib/types";
 import {
   AlertTriangle, CheckCircle2, FileText, RefreshCw, Search, XCircle,
@@ -51,7 +51,7 @@ function DealInspector({
         if (alive) setInfo(d);
       })
       .catch((e) => {
-        if (alive) setLoadErr(e instanceof Error ? e.message : "Failed to analyse deal");
+        if (alive) setLoadErr(apiErrorMessage(e, "Failed to analyse deal"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -214,7 +214,7 @@ export default function DealsSection() {
         setError(null);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Failed to load deals");
+        if (alive) setError(apiErrorMessage(e, "Failed to load deals"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -239,7 +239,7 @@ export default function DealsSection() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Deals</h2>
+          <h1 className="text-lg font-semibold">Deals</h1>
           <p className="text-[13px] text-gray-muted">
             Every deal across all organizations — inspect blockers and force-advance with an audit reason.
           </p>

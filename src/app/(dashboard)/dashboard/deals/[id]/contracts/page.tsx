@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { Deal } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -69,7 +69,7 @@ export default function ContractsPage() {
       const dealData = await api.deals.get(dealId);
       setDeal(dealData);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load deal");
+      setError(apiErrorMessage(err, "Failed to load deal"));
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ export default function ContractsPage() {
       const result = await api.contracts.render(dealId, templateId);
       setSuccess(`${templateId} contract rendered and saved to vault: ${result.fileName}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : `Failed to render ${templateId}`);
+      setError(apiErrorMessage(err, `Failed to render ${templateId}`));
     } finally {
       setRendering(null);
     }

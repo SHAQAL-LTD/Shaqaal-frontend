@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { api, setTokens, clearTokens } from "@/lib/api";
+import { api, apiErrorMessage, setTokens, clearTokens } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Brand } from "@/components/app-shell";
 import NotificationBell from "@/components/NotificationBell";
@@ -27,16 +27,18 @@ type SectionKey =
   | "overview" | "users" | "deals" | "payments" | "kyc"
   | "commission" | "audit" | "health" | "config";
 
-const SECTIONS: { key: SectionKey; label: string; subtitle: string; icon: React.ElementType }[] = [
-  { key: "overview", label: "Overview", subtitle: "Platform pulse at a glance", icon: BarChart3 },
-  { key: "users", label: "Users", subtitle: "Accounts, roles, sessions and view-as", icon: Users },
-  { key: "deals", label: "Deals", subtitle: "Platform-wide inspection and force advance", icon: FileText },
-  { key: "payments", label: "Payments", subtitle: "Transactions, webhooks and reconciliation", icon: CreditCard },
-  { key: "kyc", label: "Compliance / KYC", subtitle: "Escalated review queue with bulk decisions", icon: ShieldCheck },
-  { key: "commission", label: "Commission trees", subtitle: "Lock state and disbursement oversight", icon: GitBranch },
-  { key: "audit", label: "Audit trail", subtitle: "Immutable record of every platform action", icon: ClipboardList },
-  { key: "health", label: "System health", subtitle: "DB pool, Redis, webhooks and delivery", icon: Server },
-  { key: "config", label: "Settings / Config", subtitle: "Feature flags and country profiles", icon: Settings },
+// Section titles/subtitles live with each section component — the top bar must NOT
+// repeat them (it previously rendered a second, competing header on every page).
+const SECTIONS: { key: SectionKey; label: string; icon: React.ElementType }[] = [
+  { key: "overview", label: "Overview", icon: BarChart3 },
+  { key: "users", label: "Users", icon: Users },
+  { key: "deals", label: "Deals", icon: FileText },
+  { key: "payments", label: "Payments", icon: CreditCard },
+  { key: "kyc", label: "Compliance / KYC", icon: ShieldCheck },
+  { key: "commission", label: "Commission trees", icon: GitBranch },
+  { key: "audit", label: "Audit trail", icon: ClipboardList },
+  { key: "health", label: "System health", icon: Server },
+  { key: "config", label: "Settings / Config", icon: Settings },
 ];
 
 function SessionSpinner({ label }: { label: string }) {
@@ -74,7 +76,7 @@ function OperationsLogin() {
       setTokens(tokens.accessToken, tokens.refreshToken);
       await refreshUser(); // loads the admin profile into AuthContext
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Sign-in failed";
+      const msg = apiErrorMessage(err, "Sign-in failed");
       setError(msg);
       clearTokens();
     } finally {
@@ -211,8 +213,6 @@ function OperationsConsole() {
   const [section, setSection] = useState<SectionKey>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const active = SECTIONS.find((s) => s.key === section) || SECTIONS[0];
-
   const navigate = (key: string) => {
     setSection(key as SectionKey);
     setMobileOpen(false);
@@ -309,11 +309,9 @@ function OperationsConsole() {
           >
             <Menu className="h-4 w-4" />
           </button>
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-lg font-semibold">{active.label}</h1>
-            <p className="truncate text-xs text-muted-foreground">{active.subtitle}</p>
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
+          {/* Section title + subtitle are rendered ONCE, by the section component
+              itself (with its Refresh/actions row) — see src/app/users/console/*. */}
+          <div className="ml-auto flex shrink-0 items-center gap-3">
             <NotificationBell />
             <button
               onClick={logout}

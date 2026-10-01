@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { AuditEvent, Deal } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { EmptyState } from "@/components/ui-kit";
@@ -66,7 +66,7 @@ export default function DealAuditPage() {
       setEvents(eventsData);
       setDeal(dealData);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load audit trail");
+      setError(apiErrorMessage(err, "Failed to load audit trail"));
     } finally {
       setLoading(false);
     }
@@ -83,7 +83,7 @@ export default function DealAuditPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Export failed");
+      setError(apiErrorMessage(err, "Export failed"));
     }
   }
 

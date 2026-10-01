@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import { selectClass, EmptyState } from "@/components/ui-kit";
 import type { CommissionTree, CommissionNode, Organization, PageResponse } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
@@ -78,7 +78,7 @@ export default function CommissionPage() {
       setNodes(nodesData);
       setOrgs(orgsData);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
+      setError(apiErrorMessage(err, "Failed to load data"));
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ export default function CommissionPage() {
       setTree(newTree);
       setSuccess("Commission tree created");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create tree");
+      setError(apiErrorMessage(err, "Failed to create tree"));
     } finally {
       setCreating(false);
     }
@@ -109,7 +109,7 @@ export default function CommissionPage() {
       setTree(locked);
       setSuccess("Commission tree locked — allocations are now immutable");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to lock tree");
+      setError(apiErrorMessage(err, "Failed to lock tree"));
     } finally {
       setLocking(false);
     }
@@ -140,7 +140,7 @@ export default function CommissionPage() {
       setParentNodeId("");
       loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to add node");
+      setError(apiErrorMessage(err, "Failed to add node"));
     } finally {
       setAdding(false);
     }
@@ -156,7 +156,7 @@ export default function CommissionPage() {
       setSuccess("Node removed");
       loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to remove node");
+      setError(apiErrorMessage(err, "Failed to remove node"));
     } finally {
       setRemoving(null);
     }

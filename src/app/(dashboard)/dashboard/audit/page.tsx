@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { AuditEvent, Deal } from "@/lib/types";
 import { EmptyState } from "@/components/ui-kit";
 import { ClipboardList, Search, Loader2, AlertCircle, Download, Clock, User, ArrowRight, FileText } from "lucide-react";
@@ -37,7 +37,7 @@ export default function AuditPage() {
       setEvents(auditEvents);
       setDeal(dealData);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load audit trail");
+      setError(apiErrorMessage(err, "Failed to load audit trail"));
     } finally { setLoading(false); }
   }
 
@@ -51,7 +51,7 @@ export default function AuditPage() {
       a.href = url; a.download = `audit-${dealId.trim()}.json`; a.click();
       URL.revokeObjectURL(url);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Export failed");
+      setError(apiErrorMessage(err, "Export failed"));
     }
   }
 

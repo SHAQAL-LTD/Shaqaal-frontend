@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import { titleCase } from "@/lib/utils";
 import {
   User,
@@ -127,7 +127,7 @@ export default function ProfilePage() {
       setSuccess("Profile updated successfully");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to update profile");
+      setError(apiErrorMessage(err, "Failed to update profile"));
     } finally {
       setLoading(false);
     }

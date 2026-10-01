@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthShell } from "@/components/app-shell";
 import { Field, GoldButton, inputClass, selectClass } from "@/components/ui-kit";
+import { apiErrorMessage } from "@/lib/api";
 import { ArrowRight, ArrowLeft, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 const ROLES = [
@@ -44,7 +45,7 @@ export default function RegisterPage() {
     if (password.length < 8) { setError("Password must be at least 8 characters"); return; }
     setLoading(true);
     try { await register({ fullName, email, phone, password, role, country }); router.push("/dashboard"); }
-    catch (err: unknown) { setError(err instanceof Error ? err.message : "Registration failed"); setStep(0); }
+    catch (err: unknown) { setError(apiErrorMessage(err, "Registration failed")); setStep(0); }
     finally { setLoading(false); }
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { AuditEventRow } from "@/lib/types";
 import { Activity, ChevronDown, RefreshCw, Search } from "lucide-react";
 import {
@@ -114,7 +114,7 @@ export default function AuditSection() {
         setError(null);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Failed to load audit trail");
+        if (alive) setError(apiErrorMessage(e, "Failed to load audit trail"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -140,7 +140,7 @@ export default function AuditSection() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Audit trail</h2>
+          <h1 className="text-lg font-semibold">Audit trail</h1>
           <p className="text-[13px] text-gray-muted">
             Append-only event log — every mutation platform-wide, tagged with the acting identity.
           </p>

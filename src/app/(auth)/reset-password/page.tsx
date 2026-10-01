@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import { AuthShell } from "@/components/app-shell";
 import { inputClass } from "@/components/ui-kit";
 import { ArrowRight, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
@@ -27,7 +27,7 @@ function ResetPasswordForm() {
     if (!token) { setError("Invalid or missing reset token"); return; }
     setLoading(true);
     try { await api.auth.resetPassword(token, password); setSuccess(true); setTimeout(() => router.push("/login"), 3000); }
-    catch (err: unknown) { setError(err instanceof Error ? err.message : "Reset failed"); }
+    catch (err: unknown) { setError(apiErrorMessage(err, "Reset failed")); }
     finally { setLoading(false); }
   }
 

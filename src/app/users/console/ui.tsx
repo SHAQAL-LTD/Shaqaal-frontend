@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { X, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { apiErrorMessage } from "@/lib/api";
 
 // ─── Layout ──────────────────────────────────────────────────────────
 
@@ -234,7 +235,7 @@ export function useAction() {
       await fn();
       return true;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Action failed");
+      setError(apiErrorMessage(e, "Action failed"));
       return false;
     } finally {
       setBusy(false);
@@ -261,7 +262,7 @@ export function fmtMoney(v?: string | number | null): string {
 
 export function titleize(v?: string | null): string {
   if (!v) return "—";
-  return v.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim()
+  return v.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().toLowerCase()
     .replace(/(^|\s)(\p{L})/gu, (_m, s: string, c: string) => s + c.toUpperCase());
 }
 
@@ -280,11 +281,11 @@ export function KV({ k, v }: { k: string; v: React.ReactNode }) {
 /** Human labels for the 10-stage deal pipeline (overview + deals). */
 export const STAGE_LABELS: Record<string, string> = {
   STAGE_01_REGISTRATION: "Registration",
-  STAGE_02_BROKER_ASSIGNMENT: "Broker",
-  STAGE_03_BUYER_REGISTRATION: "Buyer",
+  STAGE_02_SUPPLIER_VERIFICATION: "Supplier Verification",
+  STAGE_03_BUYER_ONBOARDING: "Buyer Onboarding",
   STAGE_04_SPA_SIGNATURE: "SPA",
   STAGE_05_PROOF_OF_FUNDS: "Proof of Funds",
-  STAGE_06_ADVANCE_PAYMENT: "Payment",
+  STAGE_06_ADVANCE_PAYMENT: "Advance Payment",
   STAGE_07_ORIGIN_LOGISTICS: "Logistics",
   STAGE_08_SHIPPING: "Shipping",
   STAGE_09_DESTINATION_CLEARANCE: "Clearance",

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import { selectClass } from "@/components/ui-kit";
 import type { Document, Deal } from "@/lib/types";
 import {
@@ -60,7 +60,7 @@ export default function DealDocumentsPage() {
       setDocuments(docs);
       setDeal(dealData);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load documents");
+      setError(apiErrorMessage(err, "Failed to load documents"));
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,7 @@ export default function DealDocumentsPage() {
       setDocType("OTHER");
       await loadData();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(apiErrorMessage(err, "Upload failed"));
     } finally {
       setUploading(false);
     }
@@ -107,7 +107,7 @@ export default function DealDocumentsPage() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Download failed");
+      setError(apiErrorMessage(err, "Download failed"));
     }
   }
 

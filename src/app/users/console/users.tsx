@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api, getAccessToken, getRefreshToken, setTokens, clearTokens } from "@/lib/api";
+import { api, apiErrorMessage, getAccessToken, getRefreshToken, setTokens, clearTokens } from "@/lib/api";
 import type { AdminUser, AuditEventRow, ImpersonationResult } from "@/lib/types";
 import {
   Eye, History, LogOut, RefreshCw, Search, Settings,
@@ -309,7 +309,7 @@ function UserAuditModal({ user, onClose }: { user: AdminUser; onClose: () => voi
         setError(null);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Failed to load audit history");
+        if (alive) setError(apiErrorMessage(e, "Failed to load audit history"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -364,7 +364,7 @@ export default function UsersSection() {
         setError(null);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Failed to load users");
+        if (alive) setError(apiErrorMessage(e, "Failed to load users"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -389,7 +389,7 @@ export default function UsersSection() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Users</h2>
+          <h1 className="text-lg font-semibold">Users</h1>
           <p className="text-[13px] text-gray-muted">
             Accounts platform-wide — sessions, roles, verification and view-as.
           </p>

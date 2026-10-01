@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import { inputClass, selectClass, EmptyState } from "@/components/ui-kit";
 import type { Organization, PageResponse } from "@/lib/types";
 import { Building2, Plus, AlertCircle, Loader2, ArrowRight, BadgeCheck, X } from "lucide-react";
@@ -33,7 +33,7 @@ export default function OrganizationsPage() {
       const res: PageResponse<Organization> = await api.organizations.list(0, 50);
       setOrgs(res.content);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load organizations");
+      setError(apiErrorMessage(err, "Failed to load organizations"));
     } finally { setLoading(false); }
   }
 
@@ -44,7 +44,7 @@ export default function OrganizationsPage() {
       setOrgs([org, ...orgs]);
       setShowCreate(false); setName(""); setLegalName(""); setCountry("");
     } catch (err: unknown) {
-      setCreateError(err instanceof Error ? err.message : "Failed to create organization");
+      setCreateError(apiErrorMessage(err, "Failed to create organization"));
     } finally { setCreating(false); }
   }
 

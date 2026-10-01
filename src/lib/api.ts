@@ -28,18 +28,203 @@ export function clearTokens(): void {
 
 let refreshPromise: Promise<AuthResponse> | null = null;
 
+// ─── Centralized error handling ───────────────────────
+// Every non-2xx response is parsed into the backend's RFC 7807 ProblemDetail
+// shape ({ detail, errorCode, requestId, fieldErrors }) and turned into a
+// SPECIFIC user-facing message by buildMessage(). Call sites should surface
+// `err.message` (or, preferably, apiErrorMessage(err, fallback)) — never a
+// hand-rolled generic string.
+
+/** The backend's catch-all 500 detail — a non-message, never show it verbatim. */
+const GENERIC_INTERNAL = "An unexpected error occurred.";
+
+function withReference(message: string, requestId?: string): string {
+  return requestId ? `${message} (Reference: ${requestId})` : message;
+}
+
+/**
+ * Map a parsed backend error body to the most specific, human-readable message
+ * we can build. Known errorCodes get tailored text; codes that carry a real
+ * `detail` (business rules, KYC, compliance…) are surfaced verbatim; anything
+ * else falls back to an honest 5xx/general message with the requestId quoted
+ * so the user can hand it to support.
+ */
+function buildMessage(e: ApiErrorType): string {
+  const code = e.errorCode || "UNKNOWN";
+  const status = e.status || 0;
+  const detail = (e.detail || "").trim();
+  const generic = !detail || detail === GENERIC_INTERNAL;
+
+  switch (code) {
+    case "AUTH_TOKEN_EXPIRED":
+    case "AUTH_TOKEN_INVALID":
+    case "AUTH_UNAUTHORIZED":
+      return "Your session expired — please sign in again.";
+    case "AUTH_INVALID_CREDENTIALS":
+      return generic ? "Incorrect email or password." : detail;
+    case "AUTH_FORBIDDEN":
+      return generic ? "You don't have permission to perform this action." : detail;
+    case "EMAIL_NOT_VERIFIED":
+      return generic ? "Verify your email address before continuing." : detail;
+    case "RATE_LIMITED":
+      return generic ? "Too many attempts — wait a minute, then try again." : detail;
+    case "NETWORK_ERROR":
+      return "Can't reach the server — check your connection and try again.";
+    case "VALIDATION_FAILED": {
+      const fields = e.fieldErrors ?? [];
+      if (fields.length > 0) {
+        const listed = fields
+          .map((f) => (f.field && f.message ? `${f.field}: ${f.message}` : f.field || f.message))
+          .join(" · ");
+        return `Check these details — ${listed}`;
+      }
+      return generic ? "Some of the details you entered aren't valid." : detail;
+    }
+    default:
+      break;
+  }
+
+  // 5xx / the backend's own catch-all — be honest, quote the support reference.
+  if (status >= 500 || code === "INTERNAL_ERROR") {
+    return withReference("Something went wrong on our end — please try again.", e.requestId);
+  }
+
+  // Any other code that carries a real backend message (BUSINESS_RULE_VIOLATION,
+  // KYC_*, COMPLIANCE_*, RESOURCE_NOT_FOUND, IDEMPOTENCY_KEY_REPLAY…) is already
+  // specific — surface it verbatim.
+  if (!generic) return detail;
+
+  return withReference(
+    status ? `The request failed (HTTP ${status}).` : "The request failed — please try again.",
+    e.requestId,
+  );
+}
+
+export class ApiClientError extends Error {
+  status: number;
+  errorCode: string;
+  detail: string;
+  requestId?: string;
+  fieldErrors?: NonNullable<ApiErrorType["fieldErrors"]>;
+  constructor(error: ApiErrorType) {
+    super(buildMessage(error)); // message is ALWAYS the specific, user-facing text
+    this.name = "ApiClientError";
+    this.status = error.status;
+    this.errorCode = error.errorCode || "UNKNOWN";
+    this.detail = error.detail || "";
+    this.requestId = error.requestId;
+    this.fieldErrors = error.fieldErrors;
+  }
+}
+
+/**
+ * THE error-to-string entry point for every catch site: `apiErrorMessage(err,
+ * "Failed to do the thing")`. Handles ApiClientError (specific text), network
+ * TypeErrors, other Error subclasses, and non-Error throws (→ fallback).
+ */
+export function apiErrorMessage(err: unknown, fallback = "Something went wrong — please try again."): string {
+  if (err instanceof ApiClientError) return err.message;
+  if (err instanceof TypeError) return "Can't reach the server — check your connection and try again.";
+  if (err instanceof Error && err.message.trim()) return err.message.trim();
+  return fallback;
+}
+
+/**
+ * Advance-specific wording: stage gates come back as BUSINESS_RULE_VIOLATION
+ * with a "Cannot advance: …" detail (the backend has no dedicated stage-gate
+ * error code), so reframe them as the proactive, specific note the user sees.
+ */
+export function advanceErrorMessage(err: unknown): string {
+  if (err instanceof ApiClientError && err.errorCode === "BUSINESS_RULE_VIOLATION" && err.detail) {
+    const requirement = err.detail.replace(/^cannot advance:\s*/i, "");
+    return `This deal can't advance yet — ${requirement}`;
+  }
+  return apiErrorMessage(err, "Couldn't advance this stage — please try again.");
+}
+
+/** Parse ANY non-2xx response into the backend's ProblemDetail shape. */
+async function toApiError(res: Response): Promise<ApiErrorType> {
+  let text = "";
+  try {
+    text = await res.text();
+  } catch {
+    /* body unreadable — fall through to status-based message */
+  }
+
+  let body: Record<string, unknown> | null = null;
+  if (text) {
+    try {
+      const parsed: unknown = JSON.parse(text);
+      if (parsed && typeof parsed === "object") body = parsed as Record<string, unknown>;
+    } catch {
+      /* non-JSON body (proxy error page / plain text) — handled below */
+    }
+  }
+
+  const str = (v: unknown): string | undefined => (typeof v === "string" ? v : undefined);
+  const rawFields = Array.isArray(body?.fieldErrors) ? (body.fieldErrors as unknown[]) : [];
+  const fieldErrors = rawFields
+    .filter((f): f is Record<string, unknown> => !!f && typeof f === "object")
+    .map((f) => ({
+      field: String(f.field ?? ""),
+      message: String(f.message ?? ""),
+      ...(typeof f.rejectedValue === "string" ? { rejectedValue: f.rejectedValue } : {}),
+    }))
+    .filter((f) => f.field || f.message);
+
+  // Prefer the ProblemDetail `detail`, then a bare JSON `message`, then a
+  // plain-text body — but never an HTML error page or a bare statusText.
+  const detail =
+    str(body?.detail) ??
+    str(body?.message) ??
+    (body === null && text && !/^\s*</.test(text) ? text.trim().slice(0, 300) : "");
+
+  return {
+    type: str(body?.type) ?? "",
+    title: str(body?.title) ?? res.statusText ?? "Error",
+    status: typeof body?.status === "number" ? body.status : res.status,
+    errorCode: str(body?.errorCode) ?? (res.status >= 500 ? "INTERNAL_ERROR" : "UNKNOWN"),
+    detail,
+    requestId: str(body?.requestId),
+    fieldErrors: fieldErrors.length > 0 ? fieldErrors : undefined,
+  };
+}
+
+/** fetch that converts unreachable-network TypeErrors into a typed, mappable error. */
+async function safeFetch(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch {
+    throw new ApiClientError({
+      type: "",
+      title: "Network error",
+      status: 0,
+      errorCode: "NETWORK_ERROR",
+      detail: "",
+    });
+  }
+}
+
 async function refreshAccessToken(): Promise<AuthResponse> {
   const refreshToken = getRefreshToken();
-  if (!refreshToken) throw new Error("No refresh token");
+  if (!refreshToken) {
+    throw new ApiClientError({
+      type: "",
+      title: "Authentication required",
+      status: 401,
+      errorCode: "AUTH_TOKEN_INVALID",
+      detail: "",
+    });
+  }
   if (refreshPromise) return refreshPromise;
   refreshPromise = (async () => {
     try {
-      const res = await fetch(`${API_URL}/auth/refresh`, {
+      const res = await safeFetch(`${API_URL}/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       });
-      if (!res.ok) throw new Error("Refresh failed");
+      if (!res.ok) throw new ApiClientError(await toApiError(res));
       const data: AuthResponse = await res.json();
       setTokens(data.accessToken, data.refreshToken);
       return data;
@@ -48,19 +233,6 @@ async function refreshAccessToken(): Promise<AuthResponse> {
     }
   })();
   return refreshPromise;
-}
-
-export class ApiClientError extends Error {
-  status: number;
-  errorCode: string;
-  detail: string;
-  constructor(error: ApiErrorType) {
-    super(error.detail);
-    this.name = "ApiClientError";
-    this.status = error.status;
-    this.errorCode = error.errorCode;
-    this.detail = error.detail;
-  }
 }
 
 async function request<T>(path: string, options: {
@@ -81,7 +253,7 @@ async function request<T>(path: string, options: {
   if (token) headers["Authorization"] = `Bearer ${token}`;
   if (body && !(body instanceof FormData)) headers["Content-Type"] = "application/json";
 
-  let res = await fetch(url.toString(), {
+  let res = await safeFetch(url.toString(), {
     method,
     headers,
     body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
@@ -93,7 +265,7 @@ async function request<T>(path: string, options: {
       const newToken = getAccessToken();
       if (newToken) {
         headers["Authorization"] = `Bearer ${newToken}`;
-        res = await fetch(url.toString(), {
+        res = await safeFetch(url.toString(), {
           method,
           headers,
           body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
@@ -106,18 +278,18 @@ async function request<T>(path: string, options: {
       if (typeof window !== "undefined") {
         window.location.href = window.location.pathname.startsWith("/users") ? "/users" : "/login";
       }
-      throw new Error("Session expired");
+      throw new ApiClientError({
+        type: "",
+        title: "Authentication required",
+        status: 401,
+        errorCode: "AUTH_TOKEN_EXPIRED",
+        detail: "",
+      });
     }
   }
 
   if (res.status === 204) return undefined as T;
-  if (!res.ok) {
-    let err: ApiErrorType;
-    try { err = await res.json(); } catch {
-      err = { type: "", title: "Error", status: res.status, errorCode: "UNKNOWN", detail: res.statusText };
-    }
-    throw new ApiClientError(err);
-  }
+  if (!res.ok) throw new ApiClientError(await toApiError(res));
   const text = await res.text();
   if (!text) return undefined as T;
   return JSON.parse(text) as T;
@@ -157,6 +329,8 @@ export const api = {
       request<T.Deal>("/deals", { method: "POST", body: data, headers: { "Idempotency-Key": crypto.randomUUID() } }),
     advance: (id: string, notes?: string) =>
       request<T.Deal>(`/deals/${id}/advance`, { method: "POST", params: { notes } }),
+    /** Dry-run every stage gate — what's missing before this deal can advance. */
+    blockers: (id: string) => request<T.DealBlockers>(`/deals/${id}/blockers`),
   },
   organizations: {
     list: (page = 0, size = 20) =>
@@ -177,8 +351,8 @@ export const api = {
     download: async (dealId: string, documentId: string) => {
       const token = getAccessToken();
       const url = `${API_URL}/deals/${dealId}/documents/${documentId}/content`;
-      const res = await fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-      if (!res.ok) throw new Error("Download failed");
+      const res = await safeFetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      if (!res.ok) throw new ApiClientError(await toApiError(res));
       return res.blob();
     },
   },

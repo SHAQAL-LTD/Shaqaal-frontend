@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { AdminPaymentRow, WebhookEventRow } from "@/lib/types";
 import { CreditCard, Search, Webhook } from "lucide-react";
 import {
@@ -112,7 +112,7 @@ function Transactions({ onFlash }: { onFlash: (msg: string) => void }) {
         setError(null);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Failed to load payments");
+        if (alive) setError(apiErrorMessage(e, "Failed to load payments"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -275,7 +275,7 @@ function WebhookFeed() {
         setError(null);
       })
       .catch((e) => {
-        if (alive) setError(e instanceof Error ? e.message : "Failed to load webhook events");
+        if (alive) setError(apiErrorMessage(e, "Failed to load webhook events"));
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -393,7 +393,7 @@ export default function PaymentsSection() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Payments</h2>
+          <h1 className="text-lg font-semibold">Payments</h1>
           <p className="text-[13px] text-gray-muted">
             Paystack + NOWPayments platform-wide — and the webhook events that used to fail silently.
           </p>

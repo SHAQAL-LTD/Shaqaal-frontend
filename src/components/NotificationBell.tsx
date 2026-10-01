@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -73,7 +73,7 @@ export default function NotificationBell({ className }: { className?: string }) 
       const res = await api.notifications.list(0, 20);
       setNotifications(res?.content ?? []);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not load notifications");
+      setError(apiErrorMessage(e, "Could not load notifications"));
     } finally {
       setLoading(false);
     }

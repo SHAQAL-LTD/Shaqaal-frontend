@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { Organization, OrganizationMember } from "@/lib/types";
 import { ArrowLeft, Loader2, AlertCircle, BadgeCheck, Users, Globe, Hash, Calendar } from "lucide-react";
 
@@ -35,7 +35,7 @@ export default function OrganizationDetailPage() {
       setOrg(orgData);
       setMembers(membersData);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load organization");
+      setError(apiErrorMessage(err, "Failed to load organization"));
     } finally { setLoading(false); }
   }
 

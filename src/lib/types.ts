@@ -224,12 +224,28 @@ export interface PageResponse<T> {
 }
 
 // ─── API Error ─────────────────────────────────────────
+/** One invalid field from a 400/422 bean-validation failure. */
+export interface ApiFieldError {
+  field: string;
+  message: string;
+  rejectedValue?: string;
+}
+
+/**
+ * RFC 7807 Problem Detail as emitted by the backend's GlobalExceptionHandler.
+ * `errorCode`, `requestId` and `fieldErrors` are extension properties — see
+ * shaqal-app .../common/GlobalExceptionHandler.java.
+ */
 export interface ApiError {
   type: string;
   title: string;
   status: number;
   errorCode: string;
   detail: string;
+  /** UUID the user can quote to support — always logged server-side. */
+  requestId?: string;
+  /** Present only on validation failures. */
+  fieldErrors?: ApiFieldError[];
 }
 
 // ─── Dashboard shell summary (GET /dashboard/summary) ──
@@ -288,8 +304,9 @@ export interface AuditEventRow {
   entity_type: string;
   entity_id: string;
   action: string;
-  before_json: string | null;
-  after_json: string | null;
+  /** JSONB payload — arrives as an object or a JSON string depending on the driver path. */
+  before_json: unknown;
+  after_json: unknown;
   ip_address: string | null;
   correlation_id: string | null;
   actor_name: string | null;

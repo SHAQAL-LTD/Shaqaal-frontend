@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, apiErrorMessage } from "@/lib/api";
 import type { ComplianceReview, ComplianceReviewDetail } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { EmptyState } from "@/components/ui-kit";
@@ -29,7 +29,7 @@ export default function CompliancePage() {
       const data = await api.compliance.queue(statusFilter);
       setReviews(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load reviews");
+      setError(apiErrorMessage(err, "Failed to load reviews"));
     } finally { setLoading(false); }
   }
 
@@ -39,7 +39,7 @@ export default function CompliancePage() {
       const detail = await api.compliance.get(id);
       setSelected(detail);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to load review");
+      setError(apiErrorMessage(err, "Failed to load review"));
     } finally { setLoadingDetail(false); }
   }
 
@@ -52,7 +52,7 @@ export default function CompliancePage() {
       setSelected(null); setDecision(""); setNote("");
       loadReviews();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Decision failed");
+      setError(apiErrorMessage(err, "Decision failed"));
     } finally { setSubmitting(false); }
   }
 
